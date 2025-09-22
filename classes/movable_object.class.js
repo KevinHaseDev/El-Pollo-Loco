@@ -4,6 +4,7 @@ class MovableObject {
     img;
     height = 200;
     width = 100;
+    speed = 0.15;
     imageCache = {};
     currentImage = 0;
 
@@ -36,10 +37,21 @@ class MovableObject {
     }
 
     moveRight() {
-        console.log("Moving right");
+         setInterval(() => {
+            this.x += this.speed;
+            if (this.x < -this.width) {
+                this.x = 800; // Reset cloud position to the right side of the canvas
+            }
+        }, 1000 / 60);  // 60 times per second
 
     }
     moveLeft() {
+        setInterval(() => {
+            this.x -= this.speed;
+            if (this.x < -this.width) {
+                this.x = 800; // Reset cloud position to the right side of the canvas
+            }
+        }, 1000 / 60);  // 60 times per second
     }
 
 }
