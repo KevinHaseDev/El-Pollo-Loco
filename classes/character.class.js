@@ -11,18 +11,11 @@ class Character extends MovableObject {
     ];
     currentImage = 0;
     constructor() {
-        super(120, 400).loadImage('../assets/img/2_character_pepe/2_walk/W-21.png');
+        super(120, 400).loadImage();
+         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
 
-        this.animate();
-    }
-
-    animate() {
-        setInterval(() => {
-            let path = this.images_walking[this.currentImage];
-            this.img = this.imageChache[path];
-            this.currentImage++;
-        }, 1000);
+        this.animate(this.images_walking, 7000 / 60);
     }
 
     jump() {
