@@ -1,8 +1,6 @@
 class World {
     character = new Character();
-    enemies = level1.enemies;
-    clouds = level1.clouds;
-    backgroundObjects = level1.backgroundObjects;
+    level = level_one;
     canvas;
     ctx;
     keyboard;
@@ -29,9 +27,9 @@ class World {
 
         this.ctx.translate(this.camera_x, 0); // Kamera verschieben
 
-        this.addObjectToMap(this.backgroundObjects);
-        this.addObjectToMap(this.clouds);
-        this.addObjectToMap(this.enemies);
+        this.addObjectToMap(this.level.backgroundObjects);
+        this.addObjectToMap(this.level.clouds);
+        this.addObjectToMap(this.level.enemies);
         this.addToMap(this.character);
 
         this.ctx.translate(-this.camera_x, 0); // Kamera zurücksetzen

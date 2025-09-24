@@ -29,25 +29,27 @@ class Character extends MovableObject {
             if (!this.world || !this.world.keyboard) return;
 
             // Wenn nach rechts gedrückt wird
-            if (this.world.keyboard.right) {
+            if (this.world.keyboard.right && this.x < this.world.level.level_end_x) {
                 this.x += this.speed * 80;
                 this.otherDirection = false;
-                let i = this.currentImage % this.images_walking.length;
-                let path = this.images_walking[i];
-                this.img = this.imageCache[path];
-                this.currentImage++;
+                this.updateWalkingFrame();
+                
             }
             // Wenn nach links gedrückt wird
-            else if (this.world.keyboard.left) {
+            else if (this.world.keyboard.left && this.x > 0) {
                 this.x -= this.speed * 80;
                 this.otherDirection = true;
-                let i = this.currentImage % this.images_walking.length;
-                let path = this.images_walking[i];
-                this.img = this.imageCache[path];
-                this.currentImage++;
+                this.updateWalkingFrame();
             }
             this.world.camera_x = -this.x + 120;
-        }, 4000/60);
+        }, 2500/60);
+    }
+
+    updateWalkingFrame() {
+        let i = this.currentImage % this.images_walking.length;
+        let path = this.images_walking[i];
+        this.img = this.imageCache[path];
+        this.currentImage++;
     }
 
     jump() {
