@@ -29,11 +29,15 @@ class MovableObject {
 
     animate(images, interval = 1000 / 60) {
         setInterval(() => {
-            let i = this.currentImage % images.length;
-            let path = images[i];
-            this.img = this.imageCache[path];
-            this.currentImage++;
+        this.updateWalkingFrame(images);
         }, interval);
+    }
+
+     updateWalkingFrame() {
+        let i = this.currentImage % this.images_walking.length;
+        let path = this.images_walking[i];
+        this.img = this.imageCache[path];
+        this.currentImage++;
     }
 
     moveRight() {

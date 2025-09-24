@@ -16,7 +16,7 @@ class Character extends MovableObject {
         super(120, 400).loadImage();
         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
-
+        this.updateWalkingFrame();
         this.animate();
     }
 
@@ -43,13 +43,6 @@ class Character extends MovableObject {
             }
             this.world.camera_x = -this.x + 120;
         }, 2500/60);
-    }
-
-    updateWalkingFrame() {
-        let i = this.currentImage % this.images_walking.length;
-        let path = this.images_walking[i];
-        this.img = this.imageCache[path];
-        this.currentImage++;
     }
 
     jump() {
