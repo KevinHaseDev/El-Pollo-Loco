@@ -30,7 +30,7 @@ class Character extends MovableObject {
 
             // Wenn nach rechts gedrückt wird
             if (this.world.keyboard.right) {
-                this.x += this.speed * 60;
+                this.x += this.speed * 80;
                 this.otherDirection = false;
                 let i = this.currentImage % this.images_walking.length;
                 let path = this.images_walking[i];
@@ -39,7 +39,7 @@ class Character extends MovableObject {
             }
             // Wenn nach links gedrückt wird
             else if (this.world.keyboard.left) {
-                this.x -= this.speed * 60;
+                this.x -= this.speed * 80;
                 this.otherDirection = true;
                 let i = this.currentImage % this.images_walking.length;
                 let path = this.images_walking[i];
@@ -47,7 +47,7 @@ class Character extends MovableObject {
                 this.currentImage++;
             }
             this.world.camera_x = -this.x + 120;
-        }, 5000 / 60);
+        }, 4000/60);
     }
 
     jump() {
