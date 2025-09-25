@@ -13,30 +13,21 @@ class Character extends MovableObject {
     world;
 
     constructor() {
-        super(120, 400).loadImage();
+        super(120, 400).loadImage(this.images_walking[0]);
         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
         this.updateWalkingFrame();
+        // this.applyGravity();
         this.animate();
     }
-
-    /**
-     * Führt die Geh-Animation aus und bewegt die Figur nach links oder rechts.
-     * (Deutsch: Prüft keyboard.right und keyboard.left in world und passt x sowie das angezeigte Bild an.)
-     */
+   
     animate() {
         setInterval(() => {
-            if (!this.world || !this.world.keyboard) return;
-
-            // Wenn nach rechts gedrückt wird
             if (this.world.keyboard.right && this.x < this.world.level.level_end_x) {
                 this.x += this.speed * 80;
                 this.otherDirection = false;
                 this.updateWalkingFrame();
-                
-            }
-            // Wenn nach links gedrückt wird
-            else if (this.world.keyboard.left && this.x > 0) {
+            }else if (this.world.keyboard.left && this.x > 0) {
                 this.x -= this.speed * 80;
                 this.otherDirection = true;
                 this.updateWalkingFrame();
