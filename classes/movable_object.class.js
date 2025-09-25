@@ -39,11 +39,11 @@ class MovableObject {
 
     animate(images, interval = 1000 / 60) {
         setInterval(() => {
-        this.updateWalkingFrame(images);
+            this.updateWalkingFrame(images);
         }, interval);
     }
 
-     updateWalkingFrame() {
+    updateWalkingFrame() {
         let i = this.currentImage % this.images_walking.length;
         let path = this.images_walking[i];
         this.img = this.imageCache[path];
@@ -51,21 +51,21 @@ class MovableObject {
     }
 
     moveRight() {
-         setInterval(() => {
+        setInterval(() => {
             this.x += this.speed;
             if (this.x < -this.width) {
-                this.x = 800; // Reset cloud position to the right side of the canvas
+                this.x = 800;
             }
-        }, 1000 / 60);  // 60 times per second
+        }, 1000 / 60);
 
     }
     moveLeft() {
         setInterval(() => {
             this.x -= this.speed;
             if (this.x < -this.width) {
-                this.x = 800; // Reset cloud position to the right side of the canvas
+                this.x = 800;
             }
-        }, 1000 / 60);  // 60 times per second
+        }, 1000 / 60);
     }
 
 }

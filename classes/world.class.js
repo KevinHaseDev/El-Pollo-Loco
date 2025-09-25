@@ -14,30 +14,18 @@ class World {
         this.draw();
     }
 
-    /**
-     * Setzt Referenzen, damit das Character-Objekt auf diese World zugreift.
-     * (Deutsch: Dokumentation)
-     */
     setWorld() {
         this.character.world = this;
     }
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height); // clear canvas
-
-        this.ctx.translate(this.camera_x, 0); // Kamera verschieben
-
+        this.ctx.translate(this.camera_x, 0);
         this.addObjectToMap(this.level.backgroundObjects);
         this.addObjectToMap(this.level.clouds);
         this.addObjectToMap(this.level.enemies);
         this.addToMap(this.character);
-
-        this.ctx.translate(-this.camera_x, 0); // Kamera zurücksetzen
-
-
-
-
-        // draw wird immer wieder aufgerufen
+        this.ctx.translate(-this.camera_x, 0);
         let self = this;
         requestAnimationFrame(() => self.draw());
     }
@@ -50,9 +38,7 @@ class World {
 
     addToMap(mo) {
         this.ctx.save();
-
         if (mo.otherDirection) {
-            // nach links spiegeln
             this.ctx.translate(mo.x + mo.width, mo.y);
             this.ctx.scale(-1, 1);
             this.ctx.drawImage(mo.img, 0, 0, mo.width, mo.height);
@@ -60,7 +46,6 @@ class World {
             this.ctx.translate(mo.x, mo.y);
             this.ctx.drawImage(mo.img, 0, 0, mo.width, mo.height);
         }
-
         this.ctx.restore();
     }
 }
