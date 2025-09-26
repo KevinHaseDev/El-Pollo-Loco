@@ -7,22 +7,26 @@ class MovableObject {
     speed = 0.15;
     imageCache = {};
     currentImage = 0;
-    // speedY = 0;
-    // acceleration = 0.002;
+    speedY = 0;
+    acceleration = 1.5;
 
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 
-    // applyGravity() {
-    //     setInterval(() => {
-    //         if (this.isAboveGround() || this.speedY > 0) {
-    //             this.y -= this.speedY;
-    //             this.speedY -= this.acceleration;
-    //         }
-    //     }, 1000 / 60);
-    // }
+    applyGravity() {
+        setInterval(() => {
+            if (this.isAboveGround() || this.speedY > 0) {
+                this.y -= this.speedY;
+                this.speedY -= this.acceleration;
+            }
+        }, 1000 / 60);
+    }
+
+    isAboveGround() {
+        return this.y < 213;
+    }
 
     loadImage(path) {
         this.img = new Image();
@@ -43,29 +47,22 @@ class MovableObject {
         }, interval);
     }
 
-    updateWalkingFrame() {
+    updateWalkingFrame(images) {
         let i = this.currentImage % this.images_walking.length;
-        let path = this.images_walking[i];
+        let path = images[i];
         this.img = this.imageCache[path];
         this.currentImage++;
     }
 
     moveRight() {
-        setInterval(() => {
-            this.x += this.speed;
-            if (this.x < -this.width) {
-                this.x = 800;
-            }
-        }, 1000 / 60);
-
+        this.x += this.speed;
     }
+
     moveLeft() {
-        setInterval(() => {
-            this.x -= this.speed;
-            if (this.x < -this.width) {
-                this.x = 800;
-            }
-        }, 1000 / 60);
+        this.x -= this.speed;
     }
 
+    jump() {
+        this.speedY = 25
+    }
 }

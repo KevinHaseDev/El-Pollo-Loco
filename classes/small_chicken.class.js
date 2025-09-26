@@ -1,17 +1,26 @@
-class SmallChicken extends Chicken {
-    constructor() {
-        super();
-        this.x = 400 + Math.random() * 3500;
-        this.y = 390;
-        this.width = 30;
-        this.height = 30;
-        this.images_walking = [
+class SmallChicken extends MovableObject {
+    y = 390;
+    width = 30;
+    height = 30;
+    images_walking = [
             '../assets/img/3_enemies_chicken/chicken_small/1_walk/1_w.png',
             '../assets/img/3_enemies_chicken/chicken_small/1_walk/2_w.png',
             '../assets/img/3_enemies_chicken/chicken_small/1_walk/3_w.png'
         ];
-        this.currentImage = 0;
+    constructor() {
+        super(100, 300);
+        this.x = 400 + Math.random() * 3500;
+        this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
-        this.animate();
+        this.animate(this.images_walking);
+        this.speed = 0.25 + Math.random() * 0.35;
+        this.animateWalking();
+        this.updateWalkingFrame(this.images_walking);
+        
+    }
+    animateWalking() {
+        setInterval(() => {
+            this.moveLeft();
+        }, 1000 / 60);
     }
 }

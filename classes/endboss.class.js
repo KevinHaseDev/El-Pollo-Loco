@@ -16,9 +16,10 @@ class Endboss extends MovableObject {
     currentImage = 0;
 
     constructor() {
-        super().loadImage(this.images_walking[0]);
+        super()
+        this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
-        this.animate();
+        this.animate(this.images_walking);
         this.updateWalkingFrame(this.images_walking);
     }
 
@@ -27,4 +28,10 @@ class Endboss extends MovableObject {
             this.updateWalkingFrame(this.images_walking);
         }, 500);
     }
+
+    // animateWalking() {
+    //     setInterval(() => {
+    //         this.moveLeft();
+    //     }, 1000 / 60);
+    // }
 }
