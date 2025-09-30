@@ -10,11 +10,17 @@ class Cloud extends MovableObject {
     constructor() {
         super(100, 300)
         this.loadImage(this.imagesCloud[0]);
-        this.x = Math.random() * 3500;
+        this.x = 400 + Math.random() * 3500;
+        this.speed = 0.15 + Math.random() * 0.35;
+        this.cloudMovement();
     }
 
-    animateWalking() {
-        this.moveLeft();
+    
+    cloudMovement() {
+        let self = this;
+        setInterval(() => {
+            self.moveLeft();
+        }, 1000 / 60); // 60 FPS
     }
 
 }

@@ -49,7 +49,7 @@ class World {
         this.ctx.beginPath();
         this.ctx.lineWidth = '5';
         this.ctx.strokeStyle = 'blue';
-        this.ctx.rect(50, 50, 150, 80);
+        this.ctx.rect(0, 0, mo.width, mo.height);
         this.ctx.stroke();
         
         this.ctx.restore();
