@@ -16,16 +16,10 @@ class MovableObject extends DrawableObject {
     }
 
     isAboveGround() {
-        return this.y < 213;
-    }
-
-    drawFrame(ctx) {
-        if (this instanceof Character || this instanceof Chicken || this instanceof Endboss) { // || this instanceof ThrowableObject für Flaschenwurf
-            ctx.beginPath();
-            ctx.lineWidth = '5';
-            ctx.strokeStyle = 'blue';
-            ctx.rect(this.x, this.y, this.width, this.height);
-            ctx.stroke();
+        if (this instanceof ThrowableObject) {
+            return true;
+        } else {
+            return this.y < 213;
         }
     }
 
@@ -37,7 +31,7 @@ class MovableObject extends DrawableObject {
     }
 
     hit() {
-    this.energy -= 5;
+    this.energy -= 20;
     if (this.energy < 0) {
         this.energy = 0;
         } else {
