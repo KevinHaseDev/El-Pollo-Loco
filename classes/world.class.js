@@ -37,20 +37,20 @@ class World {
     }
 
     addToMap(mo) {
-        this.ctx.save();
+        
         if (mo.otherDirection) {
-            this.ctx.translate(mo.x + mo.width, mo.y);
+            this.ctx.save();
+            this.ctx.translate(mo.width, 0);
             this.ctx.scale(-1, 1);
-            this.ctx.drawImage(mo.img, 0, 0, mo.width, mo.height);
-        } else {
-            this.ctx.translate(mo.x, mo.y);
-            this.ctx.drawImage(mo.img, 0, 0, mo.width, mo.height);
+            mo.x = mo.x * -1;
         }
-        this.ctx.beginPath();
-        this.ctx.lineWidth = '5';
-        this.ctx.strokeStyle = 'blue';
-        this.ctx.rect(0, 0, mo.width, mo.height);
-        this.ctx.stroke();
+        mo.draw(this.ctx);
+        mo.drawFrame(this.ctx);
+        if (mo.otherDirection)  { 
+            this.ctx.restore();
+            mo.x = mo.x * -1;
+        }
+        
         
         this.ctx.restore();
     }

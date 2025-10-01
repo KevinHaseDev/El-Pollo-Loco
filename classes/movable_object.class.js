@@ -9,11 +9,7 @@ class MovableObject {
     currentImage = 0;
     speedY = 0;
     acceleration = 1.5;
-
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
+    otherDirection = false;
 
     applyGravity() {
         setInterval(() => {
@@ -39,6 +35,18 @@ class MovableObject {
             img.src = path;
             this.imageCache[path] = img;
         });
+    }
+
+    draw(ctx) {
+        ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+    }
+
+    drawFrame(ctx) {
+        ctx.beginPath();
+        ctx.lineWidth = '5';
+        ctx.strokeStyle = 'blue';
+        ctx.rect(this.x, this.y, this.width, this.height);
+        ctx.stroke();
     }
 
     animate(images, interval = 1000 / 60) {
