@@ -20,12 +20,12 @@ class Endboss extends MovableObject {
         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
         this.animate(this.images_walking);
-        this.updateWalkingFrame(this.images_walking);
+        this.playAnimation(this.images_walking);
     }
 
     animate() {
         setInterval(() => {
-            this.updateWalkingFrame(this.images_walking);
+            this.playAnimation(this.images_walking);
         }, 500);
     }
 

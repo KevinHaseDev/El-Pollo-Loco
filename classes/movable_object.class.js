@@ -1,16 +1,11 @@
-class MovableObject {
-    x = 120;
-    y = 250;
-    img;
-    height = 200;
-    width = 100;
+class MovableObject extends DrawableObject {
     speed = 0.15;
-    imageCache = {};
-    currentImage = 0;
+    otherDirection = false;
     speedY = 0;
     acceleration = 1.5;
-    otherDirection = false;
-
+    energy = 100;
+    lastHit = 0;
+    
     applyGravity() {
         setInterval(() => {
             if (this.isAboveGround() || this.speedY > 0) {
@@ -24,39 +19,50 @@ class MovableObject {
         return this.y < 213;
     }
 
-    loadImage(path) {
-        this.img = new Image();
-        this.img.src = path;
-    }
-
-    loadImages(arr) {
-        arr.forEach((path) => {
-            let img = new Image();
-            img.src = path;
-            this.imageCache[path] = img;
-        });
-    }
-
-    draw(ctx) {
-        ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
-    }
-
     drawFrame(ctx) {
-        ctx.beginPath();
-        ctx.lineWidth = '5';
-        ctx.strokeStyle = 'blue';
-        ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.stroke();
+        if (this instanceof Character || this instanceof Chicken || this instanceof Endboss) { // || this instanceof ThrowableObject für Flaschenwurf
+            ctx.beginPath();
+            ctx.lineWidth = '5';
+            ctx.strokeStyle = 'blue';
+            ctx.rect(this.x, this.y, this.width, this.height);
+            ctx.stroke();
+        }
+    }
+
+    isColliding(mo) {
+    return this.x + this.width > mo.x &&
+        this.y + this.height > mo.y &&
+        this.x < mo.x + mo.width &&
+        this.y < mo.y + mo.height
+    }
+
+    hit() {
+    this.energy -= 5;
+    if (this.energy < 0) {
+        this.energy = 0;
+        } else {
+        this.lastHit = new Date().getTime();
+        }
+    }
+
+    isHurt() {
+    let timepassed = new Date().getTime() - this.lastHit; // difference in ms
+    timepassed = timepassed / 1000; // difference in s
+    return timepassed < 0.2;
+    }
+
+    isDead() {
+        return this.energy == 0;
     }
 
     animate(images, interval = 1000 / 60) {
         setInterval(() => {
-            this.updateWalkingFrame(images);
+            this.playAnimation(images);
         }, interval);
     }
 
-    updateWalkingFrame(images) {
-        let i = this.currentImage % this.images_walking.length;
+    playAnimation(images) {
+        let i = this.currentImage % images.length;
         let path = images[i];
         this.img = this.imageCache[path];
         this.currentImage++;
@@ -74,3 +80,13 @@ class MovableObject {
         this.speedY = 25
     }
 }
+
+// if (character.x + character.width > chicken.x &&
+//     character.x < chicken.x + chicken.width &&
+//     character.x < chicken.x &&
+//     character.y + character.height > chicken.y &&
+//     character.y < chicken.y + chicken.height) {
+//     // collision detected!
+    
+// }
+

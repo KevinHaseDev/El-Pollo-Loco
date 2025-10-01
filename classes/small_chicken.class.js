@@ -1,4 +1,4 @@
-class SmallChicken extends MovableObject {
+class SmallChicken extends Chicken {
     y = 390;
     width = 30;
     height = 30;
@@ -13,9 +13,9 @@ class SmallChicken extends MovableObject {
         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
         this.animate(this.images_walking);
-        this.speed = 0.25 + Math.random() * 0.35;
+        this.speed = 0.3 + Math.random() * 0.35;
         this.animateWalking();
-        this.updateWalkingFrame(this.images_walking);
+        this.playAnimation(this.images_walking);
         
     }
     animateWalking() {
