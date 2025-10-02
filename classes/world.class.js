@@ -5,7 +5,7 @@ class World {
     ctx;
     keyboard;
     camera_x = 0;
-    statusBar = new StatusBar(); // vielleicht mit einem array lösen
+    statusBar = [new HealthBar(), new CoinBar(), new BottleBar()];
     throwableObject = [];
 
     constructor(canvas, keyboard) {
@@ -92,16 +92,20 @@ class World {
     }
 
 // zwei statusbars ( coins & bottles )
-// game over screen
-// sound effects
-// background music
-// throw bottles
+// collect coins
+// collect bottles
+// throw bottles if collect bottles > 0
 // win screen
 // game ends if he dies or wins
 // endboss move towards character
-// collect coins
-// collect bottles
+// endboss hurt when hit by bottle
+// endboss dies when hit 5 times
 // statusbar endboss
 // jump on enemys to kill them
 // fix death animation
-//  fix small chicken animation
+// fix small chicken animation
+// fullscreen
+// Tasten overlay
+// game over screen
+// sound effects
+// background music
