@@ -5,7 +5,10 @@ class World {
     ctx;
     keyboard;
     camera_x = 0;
-    statusBar = [new HealthBar(), new CoinBar(), new BottleBar()];
+    healthBar = new HealthBar();
+    coinBar = new CoinBar();
+    bottleBar = new BottleBar();
+    statusBars = [this.healthBar, this.coinBar, this.bottleBar];
     throwableObject = [];
 
     constructor(canvas, keyboard) {
@@ -34,12 +37,15 @@ class World {
             this.throwableObject.push(bottle);
         }
     }
+
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
             if (this.character.isColliding(enemy)) {
                 this.character.hit();
-                this.statusBar.setPercentage(this.character.energy);
-
+                this.healthBar.setPercentage(this.character.energy);
+                // Beispiel: Coins und Bottles updaten
+                // this.coinBar.setPercentage(this.character.coins);
+                // this.bottleBar.setPercentage(this.character.bottles);
             }
         });
     }
@@ -52,7 +58,7 @@ class World {
             this.addObjectToMap(this.level.enemies);
             this.addObjectToMap(this.throwableObject);
             this.ctx.translate(-this.camera_x, 0);
-            this.addToMap(this.statusBar);
+            this.addObjectToMap(this.statusBars);
             this.ctx.translate(this.camera_x, 0);
             this.addToMap(this.character);
             this.ctx.translate(-this.camera_x, 0);
@@ -60,38 +66,37 @@ class World {
             requestAnimationFrame(() => self.draw());
         }
 
-        addObjectToMap(object) {
-            object.forEach(obj => {
-                this.addToMap(obj);
-            });
-        }
-
-        addToMap(mo) {
-            if (mo.otherDirection) {
-                this.flipImage(mo);
-            }
-            mo.draw(this.ctx);
-            mo.drawFrame(this.ctx);
-            if (mo.otherDirection) {
-                this.flipImageBack(mo);
-            }
-            this.ctx.restore();
-        }
-
-        flipImage(mo) {
-            this.ctx.save();
-            this.ctx.translate(mo.width, 0);
-            this.ctx.scale(-1, 1);
-            mo.x = mo.x * -1;
-        }
-
-        flipImageBack(mo) {
-            this.ctx.restore();
-            mo.x = mo.x * -1;
-        }
+    addObjectToMap(object) {
+        object.forEach(obj => {
+            this.addToMap(obj);
+        });
     }
 
-// zwei statusbars ( coins & bottles )
+    addToMap(mo) {
+        if (mo.otherDirection) {
+            this.flipImage(mo);
+        }
+        mo.draw(this.ctx);
+        mo.drawFrame(this.ctx);
+        if (mo.otherDirection) {
+            this.flipImageBack(mo);
+        }
+        this.ctx.restore();
+    }
+
+    flipImage(mo) {
+        this.ctx.save();
+        this.ctx.translate(mo.width, 0);
+        this.ctx.scale(-1, 1);
+        mo.x = mo.x * -1;
+    }
+
+    flipImageBack(mo) {
+        this.ctx.restore();
+        mo.x = mo.x * -1;
+    }
+}
+
 // collect coins
 // collect bottles
 // throw bottles if collect bottles > 0

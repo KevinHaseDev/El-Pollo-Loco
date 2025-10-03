@@ -31,18 +31,21 @@ class MovableObject extends DrawableObject {
     }
 
     hit() {
-    this.energy -= 20;
-    if (this.energy < 0) {
-        this.energy = 0;
-        } else {
-        this.lastHit = new Date().getTime();
+        let now = new Date().getTime();
+        if (now - this.lastHit > 500) {
+            this.energy -= 20;
+            if (this.energy < 0) {
+                this.energy = 0;
+                } else {
+                this.lastHit = now;
+                }
         }
     }
 
     isHurt() {
     let timepassed = new Date().getTime() - this.lastHit; // difference in ms
-    timepassed = timepassed / 1000; // difference in s
-    return timepassed < 0.2;
+    timepassed = timepassed / 2000; // difference in s
+    return timepassed <0.2;
     }
 
     isDead() {
@@ -73,14 +76,7 @@ class MovableObject extends DrawableObject {
     jump() {
         this.speedY = 25
     }
-}
+} 
 
-// if (character.x + character.width > chicken.x &&
-//     character.x < chicken.x + chicken.width &&
-//     character.x < chicken.x &&
-//     character.y + character.height > chicken.y &&
-//     character.y < chicken.y + chicken.height) {
-//     // collision detected!
-    
-// }
+
 
