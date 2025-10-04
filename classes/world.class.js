@@ -40,13 +40,19 @@ class World {
 
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy)) {
+           
+            if (this.character.isColliding(enemy) && this.character.isAboveGround()) {
+                 console.log("Collision with:", enemy.constructor.name);
+
+                enemy.hit();
+                this.level.enemies = this.level.enemies.filter(e => e !== enemy);
+            } else  if (this.character.isColliding(enemy)) {
                 this.character.hit();
                 this.healthBar.setPercentage(this.character.energy);
                 // Beispiel: Coins und Bottles updaten
                 // this.coinBar.setPercentage(this.character.coins);
                 // this.bottleBar.setPercentage(this.character.bottles);
-            }
+            } 
         });
     }
         draw() {

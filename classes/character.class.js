@@ -1,5 +1,5 @@
 class Character extends MovableObject {
-    y = 80;
+    y = 213;
     images_idle = [
         '../assets/img/2_character_pepe/1_idle/idle/I-1.png',
         '../assets/img/2_character_pepe/1_idle/idle/I-2.png',
