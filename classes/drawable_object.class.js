@@ -33,4 +33,14 @@ class DrawableObject {
             ctx.stroke();
         }
     }
+
+    drawOffsetFrame(ctx) {
+        if (this instanceof Character || this instanceof Chicken || this instanceof Endboss) { // || this instanceof ThrowableObject für Flaschenwurf
+            ctx.beginPath();
+            ctx.lineWidth = '5';
+            ctx.strokeStyle = 'red';
+            ctx.rect(this.realX, this.realY, this.realWidth, this.realHeight);
+            ctx.stroke();
+        }
+    }
 }

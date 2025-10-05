@@ -61,6 +61,16 @@ class Character extends MovableObject {
     currentImage = 0;
     world;
     speed = 10;
+    realX;
+    realY;
+    realWidth;
+    realHeight;
+    offset = { 
+        top: 100,
+        bottom: 0,
+        left: 30,
+        right: 30
+    };
 
     constructor() {
         super(120, 400)
@@ -72,10 +82,15 @@ class Character extends MovableObject {
         this.playAnimation(this.images_walking);
         this.applyGravity();
         this.animate(this.images_walking);
+        this.getRealFrame();
+        
     }
+
+    
 
     animate() {
         setInterval(() => {
+            this.getRealFrame();
             if (this.world.keyboard.right && this.x < this.world.level.level_end_x) {
                 this.moveRight();
                 this.otherDirection = false;

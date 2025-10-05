@@ -5,6 +5,13 @@ class MovableObject extends DrawableObject {
     acceleration = 1.5;
     energy = 100;
     lastHit = 0;
+
+    getRealFrame() {
+        this.realX = this.x + this.offset.left; 
+        this.realY = this.y + this.offset.top;
+        this.realWidth = this.width - this.offset.right - this.offset.left;
+        this.realHeight = this.height - this.offset.bottom - this.offset.top;
+    }
     
     applyGravity() {
         setInterval(() => {
@@ -24,10 +31,10 @@ class MovableObject extends DrawableObject {
     }
 
     isColliding(mo) {
-    return this.x + this.width > mo.x &&
-        this.y + this.height > mo.y &&
-        this.x < mo.x + mo.width &&
-        this.y < mo.y + mo.height
+    return this.realX + this.realWidth > mo.realX &&
+        this.realY + this.realHeight > mo.realY &&
+        this.realX < mo.realX + mo.realWidth &&
+        this.realY < mo.realY + mo.realHeight
     }
 
     hit() {
@@ -55,6 +62,7 @@ class MovableObject extends DrawableObject {
     animate(images, interval = 1000 / 60) {
         setInterval(() => {
             this.playAnimation(images);
+            this.getRealFrame();
         }, interval);
     }
 

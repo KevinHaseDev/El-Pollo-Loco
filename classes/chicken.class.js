@@ -7,6 +7,16 @@ class Chicken extends MovableObject {
         '../assets/img/3_enemies_chicken/chicken_normal/1_walk/2_w.png',
         '../assets/img/3_enemies_chicken/chicken_normal/1_walk/3_w.png'
     ]
+    realX;
+    realY;
+    realWidth;
+     realHeight;
+    offset = {
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10
+    }
 
     constructor() {
         super(100, 300)
@@ -17,8 +27,11 @@ class Chicken extends MovableObject {
         this.speed = 0.15 + Math.random() * 0.35;
         this.animateWalking();
         this.playAnimation(this.images_walking);
+        this.getRealFrame();
         
     }
+
+    
 
     animateWalking() {
         setInterval(() => {

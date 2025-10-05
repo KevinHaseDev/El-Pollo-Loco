@@ -30,6 +30,7 @@ class World {
             this.checkThrowObjects();
         }, 200);
     }
+    
 
     checkThrowObjects() {
         if (this.keyboard.space) {
@@ -40,37 +41,36 @@ class World {
 
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
-           
+
             if (this.character.isColliding(enemy) && this.character.isAboveGround()) {
-                 console.log("Collision with:", enemy.constructor.name);
+                console.log("Collision with:", enemy.constructor.name);
 
                 enemy.hit();
                 this.level.enemies = this.level.enemies.filter(e => e !== enemy);
-            } else  if (this.character.isColliding(enemy)) {
+            } else if (this.character.isColliding(enemy)) {
                 this.character.hit();
                 this.healthBar.setPercentage(this.character.energy);
                 // Beispiel: Coins und Bottles updaten
                 // this.coinBar.setPercentage(this.character.coins);
                 // this.bottleBar.setPercentage(this.character.bottles);
-            } 
+            }
         });
     }
-        draw() {
-            if (this.gameOver) return;
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ctx.translate(this.camera_x, 0);
-            this.addObjectToMap(this.level.backgroundObjects);
-            this.addObjectToMap(this.level.clouds);
-            this.addObjectToMap(this.level.enemies);
-            this.addObjectToMap(this.throwableObject);
-            this.ctx.translate(-this.camera_x, 0);
-            this.addObjectToMap(this.statusBars);
-            this.ctx.translate(this.camera_x, 0);
-            this.addToMap(this.character);
-            this.ctx.translate(-this.camera_x, 0);
-            let self = this;
-            requestAnimationFrame(() => self.draw());
-        }
+    draw() {
+        if (this.gameOver) return;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.translate(this.camera_x, 0);
+        this.addObjectToMap(this.level.backgroundObjects);
+        this.addObjectToMap(this.level.clouds);
+        this.addObjectToMap(this.level.enemies);
+        this.addObjectToMap(this.throwableObject);
+        this.ctx.translate(-this.camera_x, 0);
+        this.addObjectToMap(this.statusBars);
+        this.ctx.translate(this.camera_x, 0);
+        this.addToMap(this.character);
+        this.ctx.translate(-this.camera_x, 0);
+        requestAnimationFrame(() => this.draw());
+    }
 
     addObjectToMap(object) {
         object.forEach(obj => {
@@ -84,9 +84,11 @@ class World {
         }
         mo.draw(this.ctx);
         mo.drawFrame(this.ctx);
+
         if (mo.otherDirection) {
             this.flipImageBack(mo);
         }
+        mo.drawOffsetFrame(this.ctx);
         this.ctx.restore();
     }
 
@@ -112,7 +114,6 @@ class World {
 // endboss hurt when hit by bottle
 // endboss dies when hit 5 times
 // statusbar endboss
-// jump on enemys to kill them
 // fix death animation
 // fix small chicken animation
 // fullscreen
