@@ -18,6 +18,7 @@ class World {
         this.setWorld();
         this.draw();
         this.run();
+
     }
 
     setWorld() {
@@ -28,9 +29,10 @@ class World {
         setInterval(() => {
             this.checkCollisions();
             this.checkThrowObjects();
+            this.checkBossShouldMove();
+            this.checkBottleCollisions()
         }, 200);
     }
-    
 
     checkThrowObjects() {
         if (this.keyboard.space) {
@@ -39,12 +41,27 @@ class World {
         }
     }
 
+    checkBottleCollisions() {
+        this.throwableObject.forEach((bottle) => {
+            this.level.enemies.forEach((enemy) => {
+                if (bottle.isColliding(enemy)) {
+                    enemy.hit();
+
+                    // Gegner entfernen
+                    this.level.enemies = this.level.enemies.filter(e => e !== enemy);
+
+                    // Flasche ggf. auch entfernen oder "zerbrechen"
+                    this.throwableObject = this.throwableObject.filter(b => b !== bottle);
+                }
+            });
+        });
+    }
+
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
 
             if (this.character.isColliding(enemy) && this.character.isAboveGround()) {
                 console.log("Collision with:", enemy.constructor.name);
-
                 enemy.hit();
                 this.level.enemies = this.level.enemies.filter(e => e !== enemy);
             } else if (this.character.isColliding(enemy)) {
@@ -56,6 +73,17 @@ class World {
             }
         });
     }
+
+    checkBossShouldMove() {
+        console.log('Character X:', this.character.x); // Debug-Ausgabe
+
+
+        if (this.character.x >= 3599) {
+            this.level.enemies[this.level.enemies.length - 1].animateWalking();
+            console.log('Boss is moving now!');
+        }
+    }
+
     draw() {
         if (this.gameOver) return;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -110,7 +138,6 @@ class World {
 // throw bottles if collect bottles > 0
 // win screen
 // game ends if he dies or wins
-// endboss move towards character
 // endboss hurt when hit by bottle
 // endboss dies when hit 5 times
 // statusbar endboss

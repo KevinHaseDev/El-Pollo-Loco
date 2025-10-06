@@ -30,7 +30,8 @@ class Endboss extends MovableObject {
         top: 10,
         bottom: 10
     };
-    speed = 2;
+    
+    isWalking = false;
 
     constructor() {
         super()
@@ -40,9 +41,8 @@ class Endboss extends MovableObject {
         this.playAnimation(this.images_idle);
         this.getRealFrame();
         this.loadImages(this.images_walking);
-        // this.animateWalking();
-
-
+        this.getRealFrame();
+        this.speed = 1.2;
     }
 
     animate() {
@@ -51,13 +51,14 @@ class Endboss extends MovableObject {
         }, 500);
     }
 
-    // animateWalking() {
-    //     if (this.world.character.x >= 3000) {
-    //         setInterval(() => {
-    //             this.moveLeft();
-    //         }, 1000 / 60);
-    //     }
-    // }
+    animateWalking() {
+        setInterval(() => {
+            this.moveLeft();
+            this.playAnimation(this.images_walking);
+            this.getRealFrame();
+        }, 1000 / 60);
+    }
 }
+
 
 
