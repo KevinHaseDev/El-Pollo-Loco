@@ -33,7 +33,12 @@ class Chicken extends MovableObject {
 
     animateWalking() {
         setInterval(() => {
-            this.moveLeft();
+            if (!this.isDead()) {
+                this.moveLeft();
+                this.playAnimation(this.images_walking);
+            } else {
+                this.playAnimation(['./assets/img/3_enemies_chicken/chicken_normal/2_dead/dead.png']);
+            }
         }, 1000 / 60);
     }
 }
