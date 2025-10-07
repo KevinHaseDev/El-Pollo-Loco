@@ -2,6 +2,7 @@ class Spawner {
 	generateEnemyList(minCount, maxCount) {
 		let enemyList = [];
 		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
+		enemyList.push(new Endboss());
 		for (let i = 0; i < count; i++) {
 			if (Math.random() < 0.4) {
 				enemyList.push(new Chicken());
@@ -9,7 +10,7 @@ class Spawner {
 				enemyList.push(new SmallChicken());
 			}
 		}
-		enemyList.push(new Endboss());
+		
 		return enemyList;
 	}
 

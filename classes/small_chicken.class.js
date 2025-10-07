@@ -1,4 +1,4 @@
-class SmallChicken extends Chicken {
+class SmallChicken extends MovableObject {
     y = 385;
     width = 30;
     height = 30;
@@ -17,8 +17,10 @@ class SmallChicken extends Chicken {
         top: 5,
         bottom: 5
     }
+
     constructor() {
         super(100, 300);
+        this.energy = 10;
         this.x = 400 + Math.random() * 3500;
         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
@@ -27,8 +29,8 @@ class SmallChicken extends Chicken {
         this.animateWalking();
         this.playAnimation(this.images_walking);
         this.getRealFrame();
-
     }
+
     animateWalking() {
         setInterval(() => {
             this.moveLeft();

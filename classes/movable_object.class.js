@@ -5,6 +5,7 @@ class MovableObject extends DrawableObject {
     acceleration = 1.5;
     energy = 100;
     lastHit = 0;
+    groundlevel = 215; // y-Position des Bodens
 
     getRealFrame() {
         this.realX = this.x + this.offset.left; 
@@ -14,19 +15,23 @@ class MovableObject extends DrawableObject {
     }
     
     applyGravity() {
-        setInterval(() => {
-            if (this.isAboveGround() || this.speedY > 0) {
-                this.y -= this.speedY;
-                this.speedY -= this.acceleration;
-            }
-        }, 1000 / 60);
-    }
+    setInterval(() => {
+        if (this.isAboveGround() || this.speedY > 0) {
+            this.y -= this.speedY;
+            this.speedY -= this.acceleration;
+        } else {
+            // Charakter ist auf dem Boden
+            this.y = this.groundlevel;
+            this.speedY = 0;
+        }
+    }, 1000 / 60);
+}
 
     isAboveGround() {
         if (this instanceof ThrowableObject) {
             return true;
         } else {
-            return this.y < 215;
+            return this.y < this.groundlevel;
         }
     }
 
@@ -56,7 +61,7 @@ class MovableObject extends DrawableObject {
     }
 
     isDead() {
-        return this.energy == 0;
+        return this.energy <= 0;
     }
 
     animate(images, interval = 1000 / 60) {

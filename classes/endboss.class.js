@@ -30,11 +30,10 @@ class Endboss extends MovableObject {
         top: 10,
         bottom: 10
     };
-    
-    isWalking = false;
 
     constructor() {
         super()
+        this.energy = 100;
         this.loadImage(this.images_idle[0]);
         this.loadImages(this.images_idle);
         this.animate(this.images_idle);
@@ -42,7 +41,7 @@ class Endboss extends MovableObject {
         this.getRealFrame();
         this.loadImages(this.images_walking);
         this.getRealFrame();
-        this.speed = 1.2;
+        this.speed = 0.2;
     }
 
     animate() {

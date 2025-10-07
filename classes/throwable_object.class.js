@@ -1,6 +1,6 @@
 
 class ThrowableObject extends MovableObject {
-    speedX = 20;
+    speedX = 2;
     realX;
     realY;
     realWidth;
@@ -22,7 +22,7 @@ class ThrowableObject extends MovableObject {
 
     throw() {
         this.isThrown = true;
-        this.speedY = 28;
+        this.speedY = 20 ;
         this.applyGravity();
         setInterval(() => {
             this.getRealFrame();

@@ -10,6 +10,7 @@ class World {
     bottleBar = new BottleBar();
     statusBars = [this.healthBar, this.coinBar, this.bottleBar];
     throwableObject = [];
+    canThrow = true;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
@@ -18,7 +19,6 @@ class World {
         this.setWorld();
         this.draw();
         this.run();
-
     }
 
     setWorld() {
@@ -28,16 +28,25 @@ class World {
     run() {
         setInterval(() => {
             this.checkCollisions();
-            this.checkThrowObjects();
             this.checkBossShouldMove();
-            this.checkBottleCollisions()
-        }, 200);
+            this.checkBottleCollisions();
+            this.checkThrowObjects();
+
+        }, 1000 / 60);
+
     }
 
     checkThrowObjects() {
-        if (this.keyboard.space) {
+        if (this.keyboard.space && this.canThrow) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObject.push(bottle);
+
+            this.canThrow = false; // blockiert weiteren Wurf, solange Taste gedrückt bleibt
+        }
+
+        // Wenn Taste losgelassen wird, darf man wieder werfen
+        if (!this.keyboard.space) {
+            this.canThrow = true;
         }
     }
 
@@ -45,13 +54,15 @@ class World {
         this.throwableObject.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
                 if (bottle.isColliding(enemy)) {
-                    enemy.hit();
+                    enemy.hit(); // nutzt MovableObject.hit()
 
-                    // Gegner entfernen
-                    this.level.enemies = this.level.enemies.filter(e => e !== enemy);
-
-                    // Flasche ggf. auch entfernen oder "zerbrechen"
                     this.throwableObject = this.throwableObject.filter(b => b !== bottle);
+
+                    // Nur löschen, wenn tot:
+                    if (enemy.isDead()) {
+                        console.log(enemy.constructor.name + " ist besiegt!");
+                        this.level.enemies = this.level.enemies.filter(e => e !== enemy);
+                    }
                 }
             });
         });
@@ -75,11 +86,12 @@ class World {
     }
 
     checkBossShouldMove() {
-        console.log('Character X:', this.character.x); // Debug-Ausgabe
+        // Debug-Ausgabe
+        // console.log('Character X:', this.character.x);
+        // console.log('Character Y:', this.character.y);
 
-
-        if (this.character.x >= 3599) {
-            this.level.enemies[this.level.enemies.length - 1].animateWalking();
+        if (this.character.x >= 3595) {
+            this.level.enemies[0].animateWalking();
             console.log('Boss is moving now!');
         }
     }
@@ -111,12 +123,12 @@ class World {
             this.flipImage(mo);
         }
         mo.draw(this.ctx);
-        mo.drawFrame(this.ctx);
+        // mo.drawFrame(this.ctx);
 
         if (mo.otherDirection) {
             this.flipImageBack(mo);
         }
-        mo.drawOffsetFrame(this.ctx);
+        // mo.drawOffsetFrame(this.ctx);
         this.ctx.restore();
     }
 

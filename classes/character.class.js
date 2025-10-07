@@ -60,7 +60,7 @@ class Character extends MovableObject {
     ];
     currentImage = 0;
     world;
-    speed = 10;
+    speed = 5;
     realX;
     realY;
     realWidth;
@@ -83,14 +83,11 @@ class Character extends MovableObject {
         this.applyGravity();
         this.animate(this.images_walking);
         this.getRealFrame();
-        
     }
-
-    
-
 
     animate() {
         setInterval(() => {
+                    
             this.getRealFrame();
             if (this.world.keyboard.right && this.x < this.world.level.level_end_x) {
                 this.moveRight();
@@ -105,7 +102,7 @@ class Character extends MovableObject {
             
             
             this.world.camera_x = -this.x + 120;
-        }, 2500 / 60);
+        }, 1000 / 60);
 
         setInterval(() => {
            if (this.isDead()) {
