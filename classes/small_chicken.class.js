@@ -7,6 +7,7 @@ class SmallChicken extends MovableObject {
         './assets/img/3_enemies_chicken/chicken_small/1_walk/2_w.png',
         './assets/img/3_enemies_chicken/chicken_small/1_walk/3_w.png'
     ];
+    images_dead = ['./assets/img/3_enemies_chicken/chicken_small/2_dead/dead.png'];
     realX;
     realY;
     realWidth;
@@ -17,6 +18,7 @@ class SmallChicken extends MovableObject {
         top: 5,
         bottom: 5
     }
+    deadcounter = 0;
 
     constructor() {
         super(100, 300);
@@ -24,16 +26,21 @@ class SmallChicken extends MovableObject {
         this.x = 400 + Math.random() * 3500;
         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
-        this.animate(this.images_walking);
-        this.speed = 0.3 + Math.random() * 0.35;
-        this.animateWalking();
-        this.playAnimation(this.images_walking);
-        this.getRealFrame();
+        this.loadImages(this.images_dead);
+        this.animate();
+        this.speed = 0.3 + Math.random() * 0.35; 
     }
 
-    animateWalking() {
+    animate() {
         setInterval(() => {
-            this.moveLeft();
+            if (!this.isDead()) {
+                this.moveLeft();
+                this.playAnimation(this.images_walking);
+                this.getRealFrame();
+            } else {
+                this.deadcounter++;
+                this.playAnimation([this.images_dead[0]]);
+            }
         }, 1000 / 60);
     }
 }
