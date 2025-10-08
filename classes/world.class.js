@@ -54,15 +54,12 @@ class World {
         this.throwableObject.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
                 if (bottle.isColliding(enemy)) {
-                    enemy.hit(); // nutzt MovableObject.hit()
-
+                    enemy.hit();
                     this.throwableObject = this.throwableObject.filter(b => b !== bottle);
-
-                    // Nur löschen, wenn tot:
-                    if (enemy.isDead()) {
-                        console.log(enemy.constructor.name + " ist besiegt!");
-                        this.level.enemies = this.level.enemies.filter(e => e !== enemy);
-                    }
+                    
+                }
+                if (enemy.deadcounter > 20) {
+                    this.level.enemies = this.level.enemies.filter(e => e !== enemy);
                 }
             });
         });
@@ -70,16 +67,16 @@ class World {
 
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
-
             if (this.character.isColliding(enemy) && this.character.isAboveGround() && this.character.speedY < 0) {
                 console.log("Collision with:", enemy.constructor.name);
                 enemy.hit();
-                if (!enemy.isDead()) {
-                    this.character.speedY = 15; // character bounct nach oben
-return;
-                }
-
+                
+           
+                this.character.speedY = 15;
+            
+               
             } else if (this.character.isColliding(enemy)) {
+                
                 this.character.hit();
                 this.healthBar.setPercentage(this.character.energy);
                 // Beispiel: Coins und Bottles updaten
