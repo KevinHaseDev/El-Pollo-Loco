@@ -74,7 +74,11 @@ class World {
             if (this.character.isColliding(enemy) && this.character.isAboveGround() && this.character.speedY < 0) {
                 console.log("Collision with:", enemy.constructor.name);
                 enemy.hit();
-                
+                if (!enemy.isDead()) {
+                    this.character.speedY = 15; // character bounct nach oben
+return;
+                }
+
             } else if (this.character.isColliding(enemy)) {
                 this.character.hit();
                 this.healthBar.setPercentage(this.character.energy);
@@ -94,7 +98,7 @@ class World {
         // console.log('Character Y:', this.character.y);
 
         if (this.character.x >= 3595) {
-            this.level.enemies[0].animateWalking();
+            this.level.enemies[0].animate();
             console.log('Boss is moving now!');
         }
     }
