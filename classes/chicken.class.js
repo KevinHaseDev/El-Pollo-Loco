@@ -20,11 +20,11 @@ class Chicken extends MovableObject {
         top: 10,
         bottom: 10
     }
-    deadcounter = 0;
+    deadtimer = 0;
 
     constructor() {
         super(100, 300)
-        this.energy = 20;
+        this.energy = 10;
         this.x = 600 + Math.random() * 3500;
         this.loadImage(this.images_walking[0]);
         this.loadImages(this.images_walking);
@@ -40,7 +40,7 @@ class Chicken extends MovableObject {
                 this.playAnimation(this.images_walking);
                 this.getRealFrame();
             } else  {
-                this.deadcounter++;
+                this.deadtimer++;
                 this.playAnimation([this.images_dead[0]]);
             }
         }, 1000 / 60);

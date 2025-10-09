@@ -21,8 +21,13 @@ class DrawableObject {
     }
 
     draw(ctx) {
+    if (this.img instanceof HTMLImageElement) {
         ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
+    } else {
+        console.warn('⚠️ draw() ohne gültiges Bild aufgerufen:', this);
     }
+}
+
     
     drawFrame(ctx) {
         if (this instanceof Character || this instanceof Chicken || this instanceof SmallChicken || this instanceof Endboss) { // || this instanceof ThrowableObject für Flaschenwurf

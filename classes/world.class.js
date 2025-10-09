@@ -8,6 +8,8 @@ class World {
     healthBar = new HealthBar();
     coinBar = new CoinBar();
     bottleBar = new BottleBar();
+    boss = this.level.enemies.find(e => e instanceof Endboss);
+
     statusBars = [this.healthBar, this.coinBar, this.bottleBar];
     throwableObject = [];
     canThrow = true;
@@ -43,10 +45,13 @@ class World {
     run() {
         setInterval(() => {
             this.checkCollisions();
-            this.checkBossShouldMove();
+            
             this.checkBottleCollisions();
             this.checkThrowObjects();
         }, 1000 / 60);
+        setInterval(() => {
+            this.checkBossShouldMove();
+        }, 200);
     }
 
     /**
@@ -75,8 +80,13 @@ class World {
                     enemy.hit();
                     this.throwableObject = this.throwableObject.filter(b => b !== bottle);
                 }
-                if (enemy.deadcounter > 20) {
+                if (enemy.deadtimer > 20) {
                     this.level.enemies = this.level.enemies.filter(e => e !== enemy);
+                    if (enemy.isDead() instanceof Endboss) {
+                    this.gameOver = true;
+                    return;
+                    
+                }
                 }
             });
         });
@@ -95,15 +105,14 @@ class World {
             } else if (this.character.isColliding(enemy)) {
                 this.character.hit();
                 this.healthBar.setPercentage(this.character.energy);
+                console.log("Character hit! Energy:", this.character.energy);
                 if (this.character.isDead()) {
                     this.gameOver = true;
                 }
             }
-            if (enemy.deadcounter > 20) {
+            if (enemy.deadtimer > 10) {
                 this.level.enemies = this.level.enemies.filter(e => e !== enemy);
-                if (enemy instanceof Endboss) {
-                    this.gameOver = true;
-                }
+                
             }
         });
     }
@@ -130,6 +139,7 @@ class World {
         this.addObjectToMap(this.level.backgroundObjects);
         this.addObjectToMap(this.level.clouds);
         this.addObjectToMap(this.level.enemies);
+        if (this.boss) {this.addToMap(this.boss.endbossBar);}
         this.addObjectToMap(this.throwableObject);
         this.ctx.translate(-this.camera_x, 0);
         this.addObjectToMap(this.statusBars);

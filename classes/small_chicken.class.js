@@ -18,7 +18,7 @@ class SmallChicken extends MovableObject {
         top: 5,
         bottom: 5
     }
-    deadcounter = 0;
+    deadtimer = 0;
 
     constructor() {
         super(100, 300);
@@ -38,7 +38,7 @@ class SmallChicken extends MovableObject {
                 this.playAnimation(this.images_walking);
                 this.getRealFrame();
             } else {
-                this.deadcounter++;
+                this.deadtimer++;
                 this.playAnimation([this.images_dead[0]]);
             }
         }, 1000 / 60);
