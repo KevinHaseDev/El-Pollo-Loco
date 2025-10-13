@@ -17,7 +17,7 @@ class Chicken extends MovableObject {
     offset = {
         left: 10,
         right: 10,
-        top: 10,
+        top: 5,
         bottom: 10
     }
     deadtimer = 0;

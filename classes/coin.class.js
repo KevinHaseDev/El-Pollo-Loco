@@ -1,8 +1,21 @@
-class Coin extends MovableObject {
+class Coins extends MovableObject {
   width = 100;
   height = 100;
-
-  images_coins = ['assets/img/8_coin/coin_1.png'];
+ 
+  realX;
+  realY;
+  realWidth;
+  realHeight;
+  offset = { 
+    top: 5, 
+    bottom: 5, 
+    left: 5, 
+    right: 5
+  };
+  images_coins = [
+    'assets/img/8_coin/coin_1.png',
+    'assets/img/8_coin/coin_2.png'
+  ];
 
   constructor(x, y) {
     super().loadImage('assets/img/8_coin/coin_1.png');
@@ -14,7 +27,8 @@ class Coin extends MovableObject {
 
   animate() {
     setInterval(() => {
+      this.getRealFrame();
       this.playAnimation(this.images_coins);
-    }, 200);
+    }, 100);
   }
 }

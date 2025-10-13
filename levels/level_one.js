@@ -1,8 +1,14 @@
 const spawner = new Spawner();
+let x = 0;
+let y = 0;
 let enemies = spawner.generateEnemyList(8, 18);
 let clouds = spawner.generateCloudList(2, 5);
+let coins = spawner.generateCoinList(20, 40);
+let bottles = spawner.generateBottleList(10, 15);
 let level_one = new Level(
 	enemies,
+	bottles,
+	coins,
 	clouds,
 	[
 		new BackgroundObject('./assets/img/5_background/layers/air.png', -719),
@@ -41,9 +47,9 @@ let spawnIntervalId = setInterval(function () {
 	if (enemies.length > 20) {
 		clearInterval(spawnIntervalId);
 	}
-	// if (Endboss.isDead()) {
-	//     clearInterval(spawnIntervalId);
-	// }
+	if (enemies[0].isDead()) {
+	    clearInterval(spawnIntervalId);
+	}
 }, 5000);
 
 let cloudSpawnIntervalId = setInterval(function () {

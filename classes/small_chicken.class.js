@@ -15,7 +15,7 @@ class SmallChicken extends MovableObject {
     offset = {
         left: 5,
         right: 5,
-        top: 5,
+        top: 15,
         bottom: 5
     }
     deadtimer = 0;

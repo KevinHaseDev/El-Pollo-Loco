@@ -73,7 +73,9 @@ class Character extends MovableObject {
     };
     energy = 100;
     deadtimer = 0;
-    
+    coinAmount = 0;
+    bottleAmount = 0
+
     constructor() {
         super(120, 400)
         this.loadImage(this.images_idle[0]);
@@ -131,7 +133,7 @@ class Character extends MovableObject {
                 return;
             }
             if (this.isDead()) {
-                this.deadtimer++;   
+                this.deadtimer++;
                 this.deadAnimation();
                 return;
             }
@@ -158,7 +160,15 @@ class Character extends MovableObject {
     }
 
     deadAnimation() {
-        
+
         this.playAnimation(this.images_dead);
+    }
+
+    collectCoin() {
+        this.coinAmount += 5;
+    }
+
+    collectBottle() {
+        this.bottleAmount += 10;
     }
 }

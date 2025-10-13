@@ -25,6 +25,45 @@ class Spawner {
 		}
 	}
 
+	generateBottleList(minCount, maxCount) {
+		let bottleList = [];
+		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
+		for (let i = 0; i < count; i++) {
+			let realX = 450 + Math.random() * 3200;
+			bottleList.push(new Bottles (realX));
+		}
+		return bottleList;
+	}
+
+	spawnRandomBottle(bottleArray) {
+		if (!bottleArray) {
+			return;
+		}
+		if (Math.random() < 0.5) {
+			bottleArray.push(new Bottles());
+		}
+	}
+
+	generateCoinList(minCount, maxCount) {
+		let coinList = [];
+		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
+		for (let i = 0; i < count; i++) {
+			let realX = 500 + Math.random() * 3000;
+			let realY = 100 + Math.random() * 200;
+			coinList.push(new Coins(realX, realY));
+		}
+		return coinList;
+	}
+
+	spawnRandomCoin(coinArray) {
+		if (!coinArray) {
+			return;
+		}
+		if (Math.random() < 0.5) {
+			coinArray.push(new Coins());
+		}
+	}
+
 	generateCloudList(minCount, maxCount) {
 		let cloudList = [];
 		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;

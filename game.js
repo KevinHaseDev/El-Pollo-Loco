@@ -34,3 +34,5 @@ window.addEventListener('keyup', (event) => {
     if (event.key == 32 || event.key === ' ')
         keyboard.space = false;
 });
+
+
