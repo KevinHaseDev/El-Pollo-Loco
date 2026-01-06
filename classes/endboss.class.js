@@ -18,7 +18,7 @@ class Endboss extends MovableObject {
     images_dead = [
         './assets/img/4_enemie_boss_chicken/5_dead/G24.png',
         './assets/img/4_enemie_boss_chicken/5_dead/G25.png',
-        './assets/img/4_enemie_boss_chicken/5_dead/G26.png',
+        './assets/img/4_enemie_boss_chicken/5_dead/G26.png'
     ];
     images_hit = [
         './assets/img/4_enemie_boss_chicken/4_hurt/G21.png',
@@ -41,9 +41,8 @@ class Endboss extends MovableObject {
         bottom: 10
     };
     deadtimer = 0;
-
     constructor() {
-        super()
+        super();
         this.energy = 100;
         this.loadImage(this.images_idle[0]);
         this.loadImages(this.images_idle);
@@ -51,24 +50,12 @@ class Endboss extends MovableObject {
         this.loadImages(this.images_dead);
         this.loadImages(this.images_hit);
         this.endbossBar = new EndbossBar(this.x + 100, this.y - 10);
-
         this.speed = 1;
     }
-
-    /**
-     * Startet die Animation und das Verhalten des Endbosses.
-     * @author
-     */
     animate() {
-
         this.handleEndbossMovement();
         this.handleEndbossBehavior();
     }
-
-    /**
-     * Steuert die Bewegung des Endbosses nach links, wenn der Charakter in der Nähe ist.
-     * @author
-     */
     handleEndbossMovement() {
         setInterval(() => {
             if (!this.isDead()) {
@@ -78,11 +65,6 @@ class Endboss extends MovableObject {
             }
         }, 1000 / 60);
     }
-
-    /**
-     * Steuert das Verhalten des Endbosses (Hurt, Dead, Attack, Alert, Idle/Attack).
-     * @author
-     */
     handleEndbossBehavior() {
         setInterval(() => {
             this.getRealFrame();
@@ -97,11 +79,6 @@ class Endboss extends MovableObject {
             }
         }, 200);
     }
-
-    /**
-     * Führt das Verhalten aus, wenn der Endboss verletzt ist.
-     * @author
-     */
     performHurtBehaviorEndboss() {
         this.playAnimation(this.images_hit);
         this.endbossBar.setPercentage(this.energy);
@@ -112,12 +89,6 @@ class Endboss extends MovableObject {
             }, 500);
         }
     }
-
-
-    /**
-     * Führt das Verhalten aus, wenn der Endboss tot ist.
-     * @author
-     */
     performDeathBehaviorEndboss() {
         this.deadtimer++;
         this.playAnimation(this.images_dead);
@@ -125,29 +96,13 @@ class Endboss extends MovableObject {
         setTimeout(() => (this.dead = true), 2000);
         this.endbossBar.setVisibility(false);
     }
-
-    /**
-     * Führt den Angriff des Endbosses aus.
-     * @author
-     */
     performAttackEndboss() {
         this.x -= this.speed;
         this.updateEndbossBar();
     }
-
-    /**
-     * Führt das Alarm-Verhalten des Endbosses aus.
-     * @author
-     */
     performAlertEndboss() {
         this.playAnimation(this.images_idle);
     }
-
-
-    /**
-     * Aktualisiert die Position der Endboss-Statusleiste.
-     * @author
-     */
     updateEndbossBar() {
         this.endbossBar.x = this.x + 100;
     }

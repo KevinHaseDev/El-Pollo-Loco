@@ -23,7 +23,7 @@ class ThrowableObject extends MovableObject {
     realY;
     realWidth;
     realHeight;
-    offset = { 
+    offset = {
         top: 5,
         bottom: 5,
         left: 15,

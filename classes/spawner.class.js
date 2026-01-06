@@ -10,7 +10,7 @@ class Spawner {
 				enemyList.push(new SmallChicken());
 			}
 		}
-		
+
 		return enemyList;
 	}
 
@@ -30,7 +30,7 @@ class Spawner {
 		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
 		for (let i = 0; i < count; i++) {
 			let realX = 450 + Math.random() * 3200;
-			bottleList.push(new Bottles (realX));
+			bottleList.push(new Bottles(realX));
 		}
 		return bottleList;
 	}

@@ -45,7 +45,6 @@ class World {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObject.push(bottle);
             this.canThrow = false;
-            this.removeBottle(index);
             this.bottleBar.setPercentage(this.character.bottleAmount);
         }
         if (!this.keyboard.space) {
@@ -148,10 +147,7 @@ class World {
         this.ctx.restore();
         mo.x = mo.x * -1;
     }
-    /**
- * Prüft, ob der Charakter eine Münze einsammelt.
- * @author Copilot
- */
+
     checkCollisionCoin() {
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
@@ -162,38 +158,29 @@ class World {
         });
     }
 
-    /**
-     * Entfernt eine Münze aus dem Level.
-     * @param {number} index - Index der Münze im Array.
-     * @author Copilot
-     */
     removeCoin(index) {
         this.level.coins.splice(index, 1);
     }
 
-    /**
- * Prüft, ob der Charakter eine Flasche einsammelt.
- * @author Copilot
- */
     checkCollisionBottle() {
         this.level.bottles.forEach((bottle, index) => {
             if (this.character.isColliding(bottle)) {
                 this.character.collectBottle();
                 this.bottleBar.setPercentage(this.character.bottleAmount);
+                this.removeBottle(index);
             }
         });
     }
 
-    /**
-     * Entfernt eine Flasche aus dem Level.
-     * @param {number} index - Index der Flasche im Array.
-     * @author Copilot
-     */
     removeBottle(index) {
         this.level.bottles.splice(index, 1);
-        
+
     }
 }
 
 
-// prüfen wieso meine coins nicht gesammelt werden
+// flaschen werden nicht eingesammelt
+// beim werfen werden flaschen aus der welt entfernt
+// endscreen
+// mobile buttons
+// sounds

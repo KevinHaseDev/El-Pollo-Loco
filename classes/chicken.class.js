@@ -1,5 +1,5 @@
 class Chicken extends MovableObject {
-     y = 340;
+    y = 340;
     width = 80;
     height = 80;
     images_walking = [
@@ -39,7 +39,7 @@ class Chicken extends MovableObject {
                 this.moveLeft();
                 this.playAnimation(this.images_walking);
                 this.getRealFrame();
-            } else  {
+            } else {
                 this.deadtimer++;
                 this.playAnimation([this.images_dead[0]]);
             }

@@ -48,7 +48,7 @@ let spawnIntervalId = setInterval(function () {
 		clearInterval(spawnIntervalId);
 	}
 	if (enemies[0].isDead()) {
-	    clearInterval(spawnIntervalId);
+		clearInterval(spawnIntervalId);
 	}
 }, 5000);
 

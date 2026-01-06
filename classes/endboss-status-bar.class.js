@@ -19,21 +19,18 @@ class EndbossBar extends StatusBar {
     this.visible = false;
     this.setPercentage(100);
   }
-/**
- * Setzt die Sichtbarkeit der Endboss-Leiste und passt die Größe entsprechend an.
- * @param {boolean} isVisible - Gibt an, ob die Leiste sichtbar sein soll.
- */
-setVisibility(isVisible) {
-  this.visible = isVisible;
-  if (!this.visible) {
-    this.x = 0;
-    this.y = 0;
-    this.width = 0;
-    this.height = 0;
-  } else {
-    this.width = 130;
-    this.height = 30;
+
+  setVisibility(isVisible) {
+    this.visible = isVisible;
+    if (!this.visible) {
+      this.x = 0;
+      this.y = 0;
+      this.width = 0;
+      this.height = 0;
+    } else {
+      this.width = 130;
+      this.height = 30;
+    }
   }
-}
 }
 

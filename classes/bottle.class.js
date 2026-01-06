@@ -10,10 +10,10 @@ class Bottles extends MovableObject {
   realY;
   realWidth;
   realHeight;
-  offset = { 
-    top: 10, 
-    bottom: 10, 
-    left: 10, 
+  offset = {
+    top: 10,
+    bottom: 10,
+    left: 10,
     right: 10
   };
   constructor(x) {
@@ -23,11 +23,11 @@ class Bottles extends MovableObject {
     this.loadImages(this.images_bottles);
     this.animate();
   }
-  
+
   animate() {
     setInterval(() => {
       this.getRealFrame();
       this.playAnimation(this.images_bottles);
     }, 200);
-}
+  }
 }

@@ -1,15 +1,15 @@
 class Coins extends MovableObject {
   width = 100;
   height = 100;
- 
+
   realX;
   realY;
   realWidth;
   realHeight;
-  offset = { 
-    top: 5, 
-    bottom: 5, 
-    left: 5, 
+  offset = {
+    top: 5,
+    bottom: 5,
+    left: 5,
     right: 5
   };
   images_coins = [
