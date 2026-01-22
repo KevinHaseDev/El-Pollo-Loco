@@ -9,6 +9,7 @@ class MovableObject extends DrawableObject {
 
     applyGravity() {
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             if (this.isAboveGround() || this.speedY > 0) {
                 this.y -= this.speedY;
                 this.speedY -= this.acceleration;
@@ -32,10 +33,12 @@ class MovableObject extends DrawableObject {
     }
 
     moveRight() {
+        if (this.world && this.world.frozen) return;
         this.x += this.speed;
     }
 
     moveLeft() {
+        if (this.world && this.world.frozen) return;
         this.x -= this.speed;
     }
 
@@ -56,6 +59,7 @@ class MovableObject extends DrawableObject {
     }
 
     hit() {
+        if (this.world && this.world.frozen) return;
         let now = new Date().getTime();
         if (now - this.lastHit > 500) {
             this.energy -= 20;
@@ -79,6 +83,7 @@ class MovableObject extends DrawableObject {
 
     animate(images, interval = 1000 / 60) {
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             this.playAnimation(images);
             this.getRealFrame();
         }, interval);

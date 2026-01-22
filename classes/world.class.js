@@ -13,12 +13,18 @@ class World {
     throwableObject = [];
     canThrow = true;
     gameOver;
+    winImage = new Image();
+    loseImage = new Image();
+    overlayType = null; // 'win' or 'lose'
+    overlayAlpha = 0;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
         this.keyboard = keyboard;
         this.setWorld();
+        this.winImage.src = "assets/img/You won, you lost/You Won B.png";
+        this.loseImage.src = "assets/img/You won, you lost/You lost.png";
         this.draw();
         this.run();
     }
@@ -28,28 +34,43 @@ class World {
     }
 
     run() {
-        setInterval(() => {
+        this.updateInterval = setInterval(() => {
             this.checkCollisions();
             this.checkBottleCollisions();
             this.checkThrowObjects();
             this.checkCollisionCoin();
             this.checkCollisionBottle();
         }, 1000 / 60);
-        setInterval(() => {
+        this.bossInterval = setInterval(() => {
             this.checkBossShouldMove();
         }, 200);
     }
 
+    freezeGame() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
+        if (this.bossInterval) {
+            clearInterval(this.bossInterval);
+            this.bossInterval = null;
+        }
+        this.frozen = true;
+    }
+
     checkThrowObjects(index) {
+        if (this.character.bottleAmount > 0) {
         if (this.keyboard.space && this.canThrow) {
             let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
             this.throwableObject.push(bottle);
             this.canThrow = false;
             this.bottleBar.setPercentage(this.character.bottleAmount);
+            this.character.bottleAmount -=10 ;
         }
         if (!this.keyboard.space) {
             this.canThrow = true;
         }
+    }
     }
 
     checkBottleCollisions() {
@@ -64,7 +85,9 @@ class World {
                 }
                 if (this.boss.isDead()) {
                     setTimeout(() => {
+                        this.overlayType = 'win';
                         this.gameOver = true;
+                        this.freezeGame();
                     }, 1000);
                 }
             });
@@ -83,7 +106,9 @@ class World {
                 console.log("Character hit! Energy:", this.character.energy);
                 if (this.character.isDead()) {
                     setTimeout(() => {
+                        this.overlayType = 'lose';
                         this.gameOver = true;
+                        this.freezeGame();
                     }, 1000);
                 }
             }
@@ -101,7 +126,6 @@ class World {
     }
 
     draw() {
-        if (this.gameOver) return;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.ctx.translate(this.camera_x, 0);
         this.addObjectToMap(this.level.backgroundObjects);
@@ -117,6 +141,37 @@ class World {
         this.addToMap(this.character);
         this.ctx.translate(-this.camera_x, 0);
         requestAnimationFrame(() => this.draw());
+        if (this.gameOver) {
+            this.drawOverlay();
+            
+        }
+    }
+
+    drawOverlay() {
+        this.ctx.save();
+        // Ensure overlay draws in canvas coordinates (no camera translation active here)
+        let img = this.overlayType === 'win' ? this.winImage : this.loseImage;
+        if (!img || !img.complete || img.naturalWidth === 0) {
+            this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.fillStyle = 'white';
+            this.ctx.font = '48px sans-serif';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(this.overlayType === 'win' ? 'YOU WIN' : 'YOU LOST', this.canvas.width / 2, this.canvas.height / 2);
+            this.ctx.restore();
+            return;
+        }
+        // simple fade-in
+        this.overlayAlpha = Math.min(1, this.overlayAlpha + 0.02);
+        this.ctx.globalAlpha = this.overlayAlpha;
+        let targetWidth = this.canvas.width * 0.6;
+        let scale = (img.width > 0) ? targetWidth / img.width : 1;
+        let targetHeight = img.height * scale;
+        let x = (this.canvas.width - targetWidth) / 2;
+        let y = (this.canvas.height - targetHeight) / 2;
+        this.ctx.drawImage(img, x, y, targetWidth, targetHeight);
+        this.ctx.globalAlpha = 1;
+        this.ctx.restore();
     }
 
     addObjectToMap(objectArray) {
@@ -179,8 +234,8 @@ class World {
 }
 
 
-// flaschen werden nicht eingesammelt
-// beim werfen werden flaschen aus der welt entfernt
+
 // endscreen
+// startscreen
 // mobile buttons
 // sounds
