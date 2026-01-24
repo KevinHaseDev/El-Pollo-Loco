@@ -30,16 +30,38 @@
     <script src="./game.js"></script>
 </head>
 
-<body onload="init()">
+<body>
 
-    <h1>El Pollo Loco</h1>
+    <!-- Portrait Mode Overlay: shown only when device is in portrait orientation -->
+    <div id="portrait-overlay" class="portrait_overlay">
+        <div class="portrait_content">
+            <div class="rotate_icon">📱 ↻</div>
+            <h2>Bitte drehe dein Gerät</h2>
+            <p>Dieses Spiel wird nur im Querformat unterstützt</p>
+        </div>
+    </div>
 
-    <canvas id="canvas" width="720px" height="480px">
+    <div class="game_area">
+        <canvas id="canvas" width="720" height="480"></canvas>
 
+        <button id="retry-button" class="game_button" aria-hidden="true">Retry</button>
 
-    </canvas>
+        <div id="start-screen" class="start_screen">
+            <img src="./assets/img/9_intro_outro_screens/start/Copilot_20260124_134246.jpg" alt="Start Screen">
+            <button id="start-button" class="game_button">Start Game</button>
+        </div>
 
-    <button id="retry-button" class="retry-button">Retry</button>
+        <div class="mobile_controls" id="mobile-controls">
+            <div class="mobile_controls_left">
+                <button class="mobile_btn" id="btn-left" aria-label="Move Left">◄</button>
+                <button class="mobile_btn" id="btn-right" aria-label="Move Right">►</button>
+            </div>
+            <div class="mobile_controls_right">
+                <button class="mobile_btn" id="btn-jump" aria-label="Jump">▲</button>
+                <button class="mobile_btn" id="btn-throw" aria-label="Throw">●</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 

@@ -41,6 +41,17 @@ class Endboss extends MovableObject {
         bottom: 10
     };
     deadtimer = 0;
+    // smooth-hurt / death helpers
+    hurtActive = false;
+    hurtDuration = 600; // ms
+    deathStarted = false;
+    // animation speed controls (ms)
+    walkFrameInterval = 180; // slower walking animation
+    lastWalkFrame = 0;
+    hurtFrameInterval = 200; // slower hurt frame rate
+    lastHurtFrame = 0;
+    // character tracking
+    world = null;
     constructor() {
         super();
         this.energy = 100;
@@ -50,7 +61,7 @@ class Endboss extends MovableObject {
         this.loadImages(this.images_dead);
         this.loadImages(this.images_hit);
         this.endbossBar = new EndbossBar(this.x + 100, this.y - 10);
-        this.speed = 1;
+        this.speed = 1.5;
     }
     animate() {
         this.handleEndbossMovement();
@@ -59,13 +70,27 @@ class Endboss extends MovableObject {
     handleEndbossMovement() {
         setInterval(() => {
             if (!this.isDead()) {
-                this.moveLeft();
-                this.playAnimation(this.images_walking);
+                // Pause regular movement while hurt to emphasize knockback
+                const now = new Date().getTime();
+                if (!this.isHurt()) {
+                    this.followCharacter();
+                    if (now - this.lastWalkFrame > this.walkFrameInterval) {
+                        this.playAnimation(this.images_walking);
+                        this.lastWalkFrame = now;
+                    }
+                } else {
+                    // play hurt frames at a slower rate
+                    if (now - this.lastHurtFrame > this.hurtFrameInterval) {
+                        this.playAnimation(this.images_hit);
+                        this.lastHurtFrame = now;
+                    }
+                }
                 this.updateEndbossBar();
             }
         }, 1000 / 60);
     }
     handleEndbossBehavior() {
+        // Faster tick for responsive animation transitions
         setInterval(() => {
             this.getRealFrame();
             if (this.isHurt()) {
@@ -77,31 +102,74 @@ class Endboss extends MovableObject {
             } else {
                 this.performAlertEndboss();
             }
-        }, 200);
+        }, 100);
     }
     performHurtBehaviorEndboss() {
-        this.playAnimation(this.images_hit);
+        const now = new Date().getTime();
+        const elapsed = now - this.lastHit;
+        if (!this.hurtActive) {
+            this.hurtActive = true;
+            this.hurtStart = now;
+            // small upward kick so gravity shows a brief bounce
+            this.speedY = 12;
+        }
+        const t = Math.min(1, elapsed / this.hurtDuration);
+        // Knockback that eases out over hurtDuration
+        const knockback = 8 * (1 - t);
+        this.x -= knockback;
+        // hurt frames are advanced from handleEndbossMovement at a controlled rate
         this.endbossBar.setPercentage(this.energy);
-        if (!this.isDead()) {
-            setTimeout(() => {
-                this.x -= this.speed;
-                this.updateEndbossBar();
-            }, 500);
+        // end hurt state when elapsed exceeds duration
+        if (elapsed > this.hurtDuration) {
+            this.hurtActive = false;
         }
     }
     performDeathBehaviorEndboss() {
+        if (!this.deathStarted) {
+            this.deathStarted = true;
+            this.deadtimer = 0;
+            // make the endboss give a small dramatic jump and fall
+            this.speedY = 18;
+            this.endbossBar.setVisibility(false);
+        }
         this.deadtimer++;
-        this.playAnimation(this.images_dead);
-        setTimeout(() => this.applyGravity(), 2000);
-        setTimeout(() => (this.dead = true), 2000);
-        this.endbossBar.setVisibility(false);
+        // slower dead-frame progression for more weight
+        if (this.deadtimer % 4 === 0) {
+            this.playAnimation(this.images_dead);
+        }
+        // after a short delay mark as fully dead so game can progress
+        if (this.deadtimer > 40) {
+            this.dead = true;
+        }
     }
     performAttackEndboss() {
-        this.x -= this.speed;
+        this.followCharacter();
         this.updateEndbossBar();
     }
     performAlertEndboss() {
         this.playAnimation(this.images_idle);
+    }
+    /**
+     * Bewegt den Endboss in Richtung des Charakters (links oder rechts).
+     * Aktualisiert auch die Sprite-Richtung entsprechend.
+     */
+    followCharacter() {
+        if (!this.world || !this.world.character) return;
+        
+        let characterX = this.world.character.x;
+        let distanceToCharacter = characterX - this.x;
+        
+        if (Math.abs(distanceToCharacter) > 50) {
+            if (distanceToCharacter < 0) {
+                // Charakter ist links vom Endboss
+                this.moveLeft();
+                this.otherDirection = false;
+            } else {
+                // Charakter ist rechts vom Endboss
+                this.moveRight();
+                this.otherDirection = true;
+            }
+        }
     }
     updateEndbossBar() {
         this.endbossBar.x = this.x + 100;

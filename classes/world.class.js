@@ -31,6 +31,9 @@ class World {
 
     setWorld() {
         this.character.world = this;
+        if (this.boss) {
+            this.boss.world = this;
+        }
     }
 
     run() {
@@ -58,68 +61,116 @@ class World {
         this.frozen = true;
     }
 
-    checkThrowObjects(index) {
-        if (this.character.bottleAmount > 0) {
-        if (this.keyboard.space && this.canThrow) {
-            let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
-            this.throwableObject.push(bottle);
-            this.canThrow = false;
-            this.bottleBar.setPercentage(this.character.bottleAmount);
-            this.character.bottleAmount -=10 ;
+    checkThrowObjects() {
+        if (this.canThrowBottle()) {
+            this.throwBottle();
         }
         if (!this.keyboard.space) {
             this.canThrow = true;
         }
     }
+
+    canThrowBottle() {
+        return this.character.bottleAmount > 0 && this.keyboard.space && this.canThrow;
+    }
+
+    throwBottle() {
+        let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+        this.throwableObject.push(bottle);
+        this.canThrow = false;
+        this.character.bottleAmount -= 10;
+        this.bottleBar.setPercentage(this.character.bottleAmount);
     }
 
     checkBottleCollisions() {
         this.throwableObject.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
-                if (bottle.isColliding(enemy)) {
-                    enemy.hit();
-                    this.throwableObject = this.throwableObject.filter(b => b !== bottle);
-                }
-                if (enemy.deadtimer > 20) {
-                    this.level.enemies = this.level.enemies.filter(e => e !== enemy);
-                }
-                if (this.boss.isDead()) {
-                    setTimeout(() => {
-                        this.overlayType = 'win';
-                        this.gameOver = true;
-                        this.freezeGame();
-                        let btn = document.getElementById('retry-button');
-                        if (btn) btn.classList.add('visible');
-                    }, 1000);
-                }
+                this.handleBottleEnemyCollision(bottle, enemy);
+                this.cleanupDeadEnemy(enemy);
+                this.checkBossDefeat();
             });
         });
     }
 
+    handleBottleEnemyCollision(bottle, enemy) {
+        if (bottle.isColliding(enemy)) {
+            enemy.hit();
+            this.throwableObject = this.throwableObject.filter(b => b !== bottle);
+        }
+    }
+
+    cleanupDeadEnemy(enemy) {
+        if (enemy.deadtimer > 20) {
+            this.level.enemies = this.level.enemies.filter(e => e !== enemy);
+        }
+    }
+
+    checkBossDefeat() {
+        if (this.boss.isDead()) {
+            setTimeout(() => {
+                this.triggerGameEnd('win');
+            }, 1000);
+        }
+    }
+
+    triggerGameEnd(type) {
+        this.overlayType = type;
+        this.gameOver = true;
+        this.freezeGame();
+        this.showRetryButton();
+    }
+
+    showRetryButton() {
+        let btn = document.getElementById('retry-button');
+        if (btn) btn.classList.add('visible');
+    }
+
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
-            if (this.character.isColliding(enemy) && this.character.isAboveGround() && this.character.speedY < 0) {
-                console.log("Collision with:", enemy.constructor.name);
-                enemy.hit();
-                this.character.speedY = 15;
-            } else if (this.character.isColliding(enemy)) {
-                this.character.hit();
-                this.healthBar.setPercentage(this.character.energy);
-                console.log("Character hit! Energy:", this.character.energy);
-                if (this.character.isDead()) {
-                    setTimeout(() => {
-                        this.overlayType = 'lose';
-                        this.gameOver = true;
-                        this.freezeGame();
-                        let btn = document.getElementById('retry-button');
-                        if (btn) btn.classList.add('visible');
-                    }, 1000);
-                }
+            const didJumpOn = this.handleJumpOnEnemy(enemy);
+            if (!didJumpOn) {
+                this.handleCharacterHitByEnemy(enemy);
             }
-            if (enemy.deadtimer > 10) {
-                this.level.enemies = this.level.enemies.filter(e => e !== enemy);
-            }
+            this.removeDeadEnemy(enemy);
         });
+    }
+
+    // Returns true if the character successfully jumped on the enemy
+    handleJumpOnEnemy(enemy) {
+        if (this.character.isColliding(enemy) && this.character.isAboveGround() && this.character.speedY < 0) {
+            console.log("Collision with:", enemy.constructor.name);
+            enemy.hit();
+            this.character.speedY = 15;
+            return true;
+        }
+        return false;
+    }
+
+    handleCharacterHitByEnemy(enemy) {
+        if (this.character.isColliding(enemy) && !this.isJumpingOnEnemy()) {
+            this.character.hit();
+            this.healthBar.setPercentage(this.character.energy);
+            console.log("Character hit! Energy:", this.character.energy);
+            this.checkCharacterDeath();
+        }
+    }
+
+    isJumpingOnEnemy() {
+        return this.character.isAboveGround() && this.character.speedY < 0;
+    }
+
+    checkCharacterDeath() {
+        if (this.character.isDead()) {
+            setTimeout(() => {
+                this.triggerGameEnd('lose');
+            }, 1000);
+        }
+    }
+
+    removeDeadEnemy(enemy) {
+        if (enemy.deadtimer > 10) {
+            this.level.enemies = this.level.enemies.filter(e => e !== enemy);
+        }
     }
 
     checkBossShouldMove() {
@@ -131,6 +182,16 @@ class World {
 
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.drawWorldObjects();
+        this.drawUI();
+        this.drawCharacter();
+        requestAnimationFrame(() => this.draw());
+        if (this.gameOver) {
+            this.drawOverlay();
+        }
+    }
+
+    drawWorldObjects() {
         this.ctx.translate(this.camera_x, 0);
         this.addObjectToMap(this.level.backgroundObjects);
         this.addObjectToMap(this.level.clouds);
@@ -140,32 +201,41 @@ class World {
         if (this.boss) { this.addToMap(this.boss.endbossBar); }
         this.addObjectToMap(this.throwableObject);
         this.ctx.translate(-this.camera_x, 0);
+    }
+
+    drawUI() {
         this.addObjectToMap(this.statusBars);
+    }
+
+    drawCharacter() {
         this.ctx.translate(this.camera_x, 0);
         this.addToMap(this.character);
         this.ctx.translate(-this.camera_x, 0);
-        requestAnimationFrame(() => this.draw());
-        if (this.gameOver) {
-            this.drawOverlay();
-            
-        }
     }
 
     drawOverlay() {
         this.ctx.save();
-        // Ensure overlay draws in canvas coordinates (no camera translation active here)
         let img = this.overlayType === 'win' ? this.winImage : this.loseImage;
         if (!img || !img.complete || img.naturalWidth === 0) {
-            this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ctx.fillStyle = 'white';
-            this.ctx.font = '48px sans-serif';
-            this.ctx.textAlign = 'center';
-            this.ctx.fillText(this.overlayType === 'win' ? 'YOU WIN' : 'YOU LOST', this.canvas.width / 2, this.canvas.height / 2);
-            this.ctx.restore();
+            this.drawFallbackOverlay();
             return;
         }
-        // simple fade-in
+        this.drawImageOverlay(img);
+        this.ctx.restore();
+    }
+
+    drawFallbackOverlay() {
+        this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = '48px sans-serif';
+        this.ctx.textAlign = 'center';
+        let text = this.overlayType === 'win' ? 'YOU WIN' : 'YOU LOST';
+        this.ctx.fillText(text, this.canvas.width / 2, this.canvas.height / 2);
+        this.ctx.restore();
+    }
+
+    drawImageOverlay(img) {
         this.overlayAlpha = Math.min(1, this.overlayAlpha + 0.02);
         this.ctx.globalAlpha = this.overlayAlpha;
         let targetWidth = this.canvas.width * 0.6;
@@ -175,7 +245,6 @@ class World {
         let y = (this.canvas.height - targetHeight) / 2;
         this.ctx.drawImage(img, x, y, targetWidth, targetHeight);
         this.ctx.globalAlpha = 1;
-        this.ctx.restore();
     }
 
     addObjectToMap(objectArray) {
@@ -233,13 +302,8 @@ class World {
 
     removeBottle(index) {
         this.level.bottles.splice(index, 1);
-
     }
 }
 
-
-
-// endscreen
-// startscreen
 // mobile buttons
 // sounds

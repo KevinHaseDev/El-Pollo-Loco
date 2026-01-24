@@ -165,10 +165,10 @@ class Character extends MovableObject {
     }
 
     collectCoin() {
-        this.coinAmount += 5;
+        this.coinAmount += 20;
     }
 
     collectBottle() {
-        this.bottleAmount += 10;
+        this.bottleAmount += 20;
     }
 }
