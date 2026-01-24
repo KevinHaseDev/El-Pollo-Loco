@@ -24,3 +24,29 @@ h1 {
 canvas {
     background-color: black;
 }
+
+/* Retry button styling: hidden by default, visible when `.visible` is added */
+#retry-button {
+    display: none;
+    margin-top: 16px;
+    padding: 12px 24px;
+    font-family: "Rye", Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    color: #ffffff;
+    background-color: #c6662f;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+}
+
+#retry-button.visible {
+    display: inline-block;
+    opacity: 1;
+}
+
+#retry-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 10px rgba(0,0,0,0.35);
+}

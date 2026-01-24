@@ -88,6 +88,8 @@ class World {
                         this.overlayType = 'win';
                         this.gameOver = true;
                         this.freezeGame();
+                        let btn = document.getElementById('retry-button');
+                        if (btn) btn.classList.add('visible');
                     }, 1000);
                 }
             });
@@ -109,6 +111,8 @@ class World {
                         this.overlayType = 'lose';
                         this.gameOver = true;
                         this.freezeGame();
+                        let btn = document.getElementById('retry-button');
+                        if (btn) btn.classList.add('visible');
                     }, 1000);
                 }
             }

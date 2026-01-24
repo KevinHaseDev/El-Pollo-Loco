@@ -5,6 +5,13 @@ let keyboard = new Keyboard();
 function init() {
     canvas = document.getElementById('canvas');
     world = new World(canvas, keyboard);
+    let retryBtn = document.getElementById('retry-button');
+    if (retryBtn) {
+        retryBtn.onclick = () => {
+            // Full reload to ensure a clean game state
+            location.reload();
+        };
+    }
 }
 
 window.addEventListener('keydown', (event) => {
