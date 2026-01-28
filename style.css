@@ -43,18 +43,18 @@ canvas {
     align-items: center;
     justify-content: center;
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: auto; /* wieder ursprüngliches Verhalten: nicht viewport-gefüllt */
+    height: auto;
     max-width: 100%;
     max-height: 100%;
 }
 
 #canvas {
-    width: 100%;
-    height: 100%;
-    max-width: 100vw;
-    max-height: 100vh;
-    object-fit: contain; /* behält Seitenverhältnis 3:2 bei */
+    /* ursprüngliche feste interne Auflösung: 720x480 (skaliert responsiv) */
+    width: 720px;
+    height: 480px;
+    max-width: 95vw;   /* skaliere auf kleinen Bildschirmen */
+    max-height: 90vh;
     display: block;
     box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
