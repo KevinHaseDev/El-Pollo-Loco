@@ -256,7 +256,7 @@ canvas {
 
 .rotate_icon {
     font-size: 80px;
-    margin-bottom: 20px;
+    margin-bottom: 50px; /* etwas mehr Abstand zur Überschrift/Text */
     animation: rotate-pulse 2s ease-in-out infinite;
 }
 
@@ -272,29 +272,30 @@ canvas {
 }
 
 .portrait_overlay p {
+    font-family: "Rye", Arial, Helvetica, sans-serif;
     font-size: 16px;
     opacity: 0.9;
 }
 
-/* Zeige Portrait Overlay nur im Hochformat auf kleinen Geräten */
-@media (orientation: portrait) and (max-width: 900px) {
+/* Zeige Portrait Overlay nur im Hochformat auf kleineren/weniger breiten Geräten */
+@media (orientation: portrait) and (max-width: 1050px) {
     .portrait_overlay {
-        display: flex !important;
+        display: flex;
     }
     
     .game_area {
-        display: none !important;
+        display: none;
     }
 }
 
 /* Landscape: Spiel wird fullscreen angezeigt */
 @media (orientation: landscape) {
     .portrait_overlay {
-        display: none !important;
+        display: none;
     }
     
     .game_area {
-        display: flex !important;
+        display: flex;
     }
     
     /* Mobile Buttons im Landscape optimieren */
