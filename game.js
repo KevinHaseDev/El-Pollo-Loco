@@ -106,10 +106,10 @@ function setupOrientationHandler() {
 function checkOrientation() {
     let overlay = document.getElementById('portrait-overlay');
     if (!overlay) return;
-    
+
     let isPortrait = window.innerHeight > window.innerWidth;
     let isSmallDevice = window.innerWidth <= 1024;
-    
+
     if (isPortrait && isSmallDevice) {
         overlay.style.display = 'flex';
     } else {
@@ -303,7 +303,9 @@ document.addEventListener('DOMContentLoaded', () => {
     init();
     setupOrientationHandler();
     setupInformationButtons();
-    
+    initSoundUI();
+
+
     let startBtn = document.getElementById('start-button');
     let startScreen = document.getElementById('start-screen');
     if (startBtn && startScreen) {
@@ -316,11 +318,152 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+/**
+ * Initialize sound UI bindings and state.
+ */
+function initSoundUI() {
+    if (!window.sound) return;
+    if (typeof window.sound.initUI === 'function') window.sound.initUI();
+    if (window.sound && window.sound.hub && typeof window.sound.hub.unmute === 'function') window.sound.hub.unmute();
+    if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(false);
+    ensureSoundIcon();
+    bindSoundButton();
+    bindLabelDialog();
+    bindSlider();
+    bindDocumentCloseHandlers();
+}
+
+/**
+ * Ensure the `sound` button has a visible icon (fallback when empty).
+ */
+function ensureSoundIcon() {
+    const btn = document.getElementById('sound');
+    if (!btn) return;
+    if (btn.innerHTML.trim() === '') {
+        btn.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">';
+        btn.setAttribute('aria-pressed', 'false');
+    }
+}
+
+/**
+ * Bind sound button to toggle mute.
+ */
+function bindSoundButton() {
+    const btn = document.getElementById('sound');
+    if (!btn || !window.sound) return;
+    btn.addEventListener('click', () => {
+        let muted;
+        if (window.sound && typeof window.sound.toggleMute === 'function') {
+            muted = window.sound.toggleMute();
+        } else if (window.audioHub && typeof window.audioHub.toggleMute === 'function') {
+            muted = window.audioHub.toggleMute();
+        } else {
+            const pressed = btn.getAttribute('aria-pressed') === 'true';
+            muted = !pressed;
+        }
+        if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(muted);
+        else {
+            btn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+            btn.innerHTML = '<img src="' + (
+                muted ? 'assets/icon/volume_off.svg' : 'assets/icon/volume_up.svg'
+            ) + '" alt="' + (muted ? 'Muted' : 'Unmuted') + '">';
+        }
+    });
+}
+
+/**
+ * Bind label button to open/close the slider dialog.
+ */
+function bindLabelDialog() {
+    const label = document.getElementById('audio-label');
+    const dialog = document.getElementById('audio-slider-dialog');
+    if (!label || !dialog) return;
+    label.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (dialog.classList.contains('open')) { closeDialog(label, dialog); return; }
+        openDialog(label, dialog);
+    });
+}
+
+/**
+ * Open slider dialog and position it.
+ */
+function openDialog(label, dialog) {
+    dialog.classList.add('open');
+    dialog.setAttribute('aria-hidden', 'false');
+    label.setAttribute('aria-expanded', 'true');
+    if (typeof window.sound.positionDialog === 'function') window.sound.positionDialog();
+}
+
+/**
+ * Close slider dialog.
+ */
+function closeDialog(label, dialog) {
+    dialog.classList.remove('open');
+    dialog.setAttribute('aria-hidden', 'true');
+    label.setAttribute('aria-expanded', 'false');
+}
+
+/**
+ * Close dialog on outside click or Escape key.
+ */
+function bindDocumentCloseHandlers() {
+    document.addEventListener('click', (e) => {
+        const label = document.getElementById('audio-label');
+        const dialog = document.getElementById('audio-slider-dialog');
+        if (!label || !dialog) return;
+        if (!label.contains(e.target) && !dialog.contains(e.target)) closeDialog(label, dialog);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            const label = document.getElementById('audio-label');
+            const dialog = document.getElementById('audio-slider-dialog');
+            if (label && dialog) closeDialog(label, dialog);
+        }
+    });
+}
+
+/**
+ * Apply mute/unmute to hub and button UI.
+ * @param {boolean} muted True to mute, false to unmute.
+ */
+function applyMuteState(muted) {
+    const btn = document.getElementById('sound');
+    if (muted) {
+        if (window.sound && window.sound.hub && typeof window.sound.hub.mute === 'function') window.sound.hub.mute();
+        else if (window.audioHub && typeof window.audioHub.mute === 'function') window.audioHub.mute();
+        if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(true);
+        else if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.innerHTML = '<img src="assets/icon/volume_off.svg" alt="Muted">'; }
+        return;
+    }
+    if (window.sound && window.sound.hub && typeof window.sound.hub.unmute === 'function') window.sound.hub.unmute();
+    else if (window.audioHub && typeof window.audioHub.unmute === 'function') window.audioHub.unmute();
+    if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(false);
+    else if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">'; }
+}
+
+/**
+ * Bind slider input to update master volume.
+ */
+function bindSlider() {
+    const slider = document.getElementById('audio-slider');
+    if (!slider) return;
+    slider.addEventListener('input', (e) => {
+        const v = Number(e.target.value);
+        if (window.sound && typeof window.sound.setMasterVolume === 'function') window.sound.setMasterVolume(v);
+        else if (window.sound && window.sound.hub && typeof window.sound.hub.setMasterVolume === 'function') window.sound.hub.setMasterVolume(v);
+        else if (window.audioHub && typeof window.audioHub.setMasterVolume === 'function') window.audioHub.setMasterVolume(v);
+        applyMuteState(v <= 0);
+    });
+    if (window.sound && window.sound.hub) slider.value = window.sound.hub.masterVolume || 1;
+    else if (window.audioHub) slider.value = window.audioHub.masterVolume || 1;
+}
+
 window.addEventListener('keydown', (event) => {
     if (isInputLocked()) {
         return;
     }
-    
+
     if (event.key == 39 || event.key === 'd')
         keyboard.right = true;
     if (event.key == 37 || event.key === 'a')
@@ -331,7 +474,7 @@ window.addEventListener('keydown', (event) => {
         keyboard.down = true;
     if (event.key == 32 || event.key === ' ')
         keyboard.space = true;
-    
+
 
 });
 

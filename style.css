@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -46,14 +47,14 @@ canvas {
     max-width: 95vw;
     max-height: 90vh;
     display: block;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .start_screen img {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     z-index: 0;
 }
 
@@ -69,7 +70,7 @@ canvas {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
     transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
     z-index: 2000;
 }
@@ -96,9 +97,11 @@ canvas {
     bottom: auto;
 }
 
-#retry-button:hover, #home-button:hover, #start-button:hover {
+#retry-button:hover,
+#home-button:hover,
+#start-button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 10px rgba(0,0,0,0.35);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.35);
 }
 
 .d_none {
@@ -115,6 +118,74 @@ canvas {
     justify-content: space-between;
     align-items: center;
     z-index: 2100;
+}
+
+/* Audio controls positioned top-right over the canvas */
+.audio_controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 2200;
+    background: rgba(0, 0, 0, 0.18);
+    padding: 6px 8px;
+    border-radius: 10px;
+}
+
+.audio_label {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+#audio-slider {
+    width: 140px;
+    max-width: 100%;
+}
+
+/* Wrapper to position the slider dialog under the label button */
+.audio_label_wrap {
+    position: relative;
+    display: inline-block;
+}
+
+/* Anchor the slider dialog to the right edge of the label by default
+   so it opens to the left and won't overflow the canvas on the right. */
+.audio_label_wrap .audio_slider_dialog {
+    right: 0;
+    left: auto;
+    transform-origin: right top;
+}
+
+.audio_slider_dialog {
+    position: absolute;
+    top: calc(100% + 8px);
+    display: none;
+    background: rgba(0, 0, 0, 0.9);
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    z-index: 2300;
+    pointer-events: auto;
+    right: 0;
+    max-width: 220px;
+}
+
+.audio_slider_dialog.open {
+    display: block;
+}
+
+/* Keep the slider compact on small screens */
+@media (max-width: 480px) {
+    #audio-slider {
+        width: 110px;
+    }
 }
 
 .canvas_info_button {
@@ -211,9 +282,10 @@ canvas {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.35);
     z-index: 1000;
 }
+
 .start_screen.hidden {
     display: none;
 }
@@ -234,7 +306,8 @@ canvas {
     pointer-events: none;
 }
 
-@media (hover: none) and (pointer: coarse), (max-width: 768px) {
+@media (hover: none) and (pointer: coarse),
+(max-width: 768px) {
     .mobile_controls.active {
         display: flex;
     }
@@ -256,7 +329,7 @@ canvas {
     color: white;
     font-size: 24px;
     font-weight: bold;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     user-select: none;
     touch-action: manipulation;
@@ -283,23 +356,23 @@ canvas {
     .game_area {
         width: 95vw;
     }
-    
+
     h1 {
         font-size: 36px;
         margin-top: 8px;
     }
-    
+
     .game_button {
         font-size: 18px;
         padding: 10px 20px;
     }
-    
+
     .mobile_btn {
         width: 55px;
         height: 55px;
         font-size: 20px;
     }
-    
+
     .mobile_controls {
         padding: 0 20px;
         bottom: 15px;
@@ -328,17 +401,17 @@ canvas {
     h1 {
         font-size: 28px;
     }
-    
+
     .mobile_btn {
         width: 50px;
         height: 50px;
         font-size: 18px;
     }
-    
+
     .mobile_controls {
         padding: 0 15px;
     }
-    
+
     .mobile_controls_left,
     .mobile_controls_right {
         gap: 8px;
@@ -380,8 +453,15 @@ canvas {
 }
 
 @keyframes rotate-pulse {
-    0%, 100% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(90deg) scale(1.1); }
+
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(90deg) scale(1.1);
+    }
 }
 
 .portrait_overlay h2 {
@@ -436,15 +516,27 @@ body.mobile_landscape_fullscreen .mobile_btn {
         height: 45px;
         font-size: 18px;
     }
-    
+
     .mobile_controls {
         bottom: 5px;
         padding: 0 10px;
     }
-    
+
     .mobile_controls_left,
     .mobile_controls_right {
         gap: 8px;
     }
 }
 
+/* Ensure canvas info buttons show their icon and center it */
+.canvas_info_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.canvas_info_button img {
+    width: 18px;
+    height: 18px;
+    display: block;
+}

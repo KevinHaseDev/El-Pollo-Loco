@@ -28,6 +28,7 @@
     <script src="./classes/spawner.class.js"></script>
     <script src="./classes/level.class.js"></script>
     <script src="./levels/level_one.js"></script>
+    <script src="./classes/audiohub.class.js"></script>
     <script src="./game.js"></script>
 </head>
 
@@ -59,11 +60,26 @@
             <button id="description-button" class="canvas_info_button">Controls</button>
         </div>
 
+        <div id="audio-controls" class="audio_controls" aria-label="Audio controls">
+            <div class="audio_label_wrap">
+                <button id="audio-label" class="audio_label canvas_info_button" type="button" aria-haspopup="dialog"
+                    aria-expanded="false" aria-controls="audio-slider-dialog">
+                    <img src="assets/icon/sound_tune.svg" alt="Volume">
+                </button>
+            </div>
+            <div id="audio-slider-dialog" class="audio_slider_dialog" role="dialog" aria-hidden="true">
+                <input id="audio-slider" type="range" min="0" max="1" step="0.01" value="1"
+                    aria-label="Master volume">
+            </div>
+            <button id="sound" class="canvas_info_button" type="button"></button>
+        </div>
+
         <section id="imprint-overlay" class="info_overlay d_none" aria-hidden="true">
             <article class="info_overlay_card" role="dialog" aria-modal="true" aria-labelledby="imprint-title">
                 <header class="info_overlay_header">
                     <h2 id="imprint-title">Imprint</h2>
-                    <button class="info_close_button" data-close-overlay="imprint-overlay" aria-label="Close Imprint">X</button>
+                    <button class="info_close_button" data-close-overlay="imprint-overlay"
+                        aria-label="Close Imprint">X</button>
                 </header>
                 <div class="info_overlay_body">
                     <p>Information in accordance with Section 5 of the German Telemedia Act (TMG)</p>
@@ -80,10 +96,12 @@
             <article class="info_overlay_card" role="dialog" aria-modal="true" aria-labelledby="description-title">
                 <header class="info_overlay_header">
                     <h2 id="description-title">Controls</h2>
-                    <button class="info_close_button" data-close-overlay="description-overlay" aria-label="Close Controls">X</button>
+                    <button class="info_close_button" data-close-overlay="description-overlay"
+                        aria-label="Close Controls">X</button>
                 </header>
                 <div class="info_overlay_body">
-                    <p>In El Pollo Loco you fight your way through the desert, collect coins and bottles, and defeat the boss at the end.</p>
+                    <p>In El Pollo Loco you fight your way through the desert, collect coins and bottles, and defeat the
+                        boss at the end.</p>
                     <h3>Controls</h3>
                     <p>A or Left Arrow: Move left</p>
                     <p>D or Right Arrow: Move right</p>
