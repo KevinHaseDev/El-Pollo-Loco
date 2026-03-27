@@ -87,17 +87,30 @@ canvas {
     z-index: 2000;
 }
 
-/* Retry button is hidden until the game ends */
-#retry-button {
+/* Endscreen action buttons are hidden until win/lose overlay is shown */
+.endscreen_actions {
     display: none;
+    position: absolute;
+    left: 50%;
+    bottom: 16%;
+    transform: translateX(-50%);
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    z-index: 2300;
 }
 
-#retry-button.visible {
-    display: inline-block;
-    opacity: 1;
+.endscreen_actions.visible {
+    display: flex;
 }
 
-#retry-button:hover, #start-button:hover {
+.endscreen_actions .game_button {
+    position: static;
+    margin-top: 0;
+    bottom: auto;
+}
+
+#retry-button:hover, #home-button:hover, #start-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 10px rgba(0,0,0,0.35);
 }

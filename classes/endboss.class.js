@@ -35,10 +35,10 @@ class Endboss extends MovableObject {
     realWidth;
     realHeight;
     offset = {
-        left: 70,
-        right: 70,
-        top: 80,
-        bottom: 60
+        left: 10,
+        right: 10,
+        top: 10,
+        bottom: 10
     };
     deadtimer = 0;
     // smooth-hurt / death helpers

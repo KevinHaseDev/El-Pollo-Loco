@@ -3,14 +3,72 @@ let world;
 let keyboard = new Keyboard();
 
 /**
- * Initialisiert das Spiel: Canvas, World, Buttons und Mobile Controls.
+ * Initialisiert einmalig die statischen UI-Bestandteile des Spiels.
  */
 function init() {
     canvas = document.getElementById('canvas');
-    world = new World(canvas, keyboard);
-    setupRetryButton();
+    setupEndscreenButtons();
     setupMobileControls();
+}
+
+/**
+ * Startet ein neues Level ohne Seiten-Reload.
+ * Diese Funktion wird sowohl vom Start- als auch vom Restart-Button verwendet.
+ */
+function startLevel() {
+    stopRunningWorld();
+
+    if (typeof startLevelOne === 'function') {
+        startLevelOne();
+    }
+
+    resetKeyboardState();
+    hideEndscreenActions();
+
+    if (!canvas) {
+        canvas = document.getElementById('canvas');
+    }
+
+    world = new World(canvas, keyboard);
     showMobileControls();
+}
+
+/**
+ * Beendet die aktuelle World sauber, damit keine alten Loops weiterlaufen.
+ */
+function stopRunningWorld() {
+    if (world && typeof world.dispose === 'function') {
+        world.dispose();
+    }
+    world = null;
+}
+
+/**
+ * Setzt alle Eingaben zurück, damit kein gedrückter Zustand erhalten bleibt.
+ */
+function resetKeyboardState() {
+    keyboard.left = false;
+    keyboard.right = false;
+    keyboard.up = false;
+    keyboard.down = false;
+    keyboard.space = false;
+}
+
+/**
+ * Kehrt ohne Reload zur Startansicht zurück.
+ */
+function returnToStartView() {
+    stopRunningWorld();
+    resetKeyboardState();
+    hideEndscreenActions();
+    hideMobileControls();
+    closeAllInfoOverlays();
+    showCanvasInfoButtons();
+
+    let startScreen = document.getElementById('start-screen');
+    if (startScreen) {
+        startScreen.classList.remove('hidden');
+    }
 }
 
 /**
@@ -20,6 +78,16 @@ function showMobileControls() {
     let mobileControls = document.getElementById('mobile-controls');
     if (mobileControls) {
         mobileControls.classList.add('active');
+    }
+}
+
+/**
+ * Versteckt die mobilen Steuerknöpfe z. B. in der Startansicht.
+ */
+function hideMobileControls() {
+    let mobileControls = document.getElementById('mobile-controls');
+    if (mobileControls) {
+        mobileControls.classList.remove('active');
     }
 }
 
@@ -51,12 +119,34 @@ function checkOrientation() {
     }
 }
 
-function setupRetryButton() {
+/**
+ * Richtet die Endscreen-Aktionen fuer Retry und Home ein.
+ */
+function setupEndscreenButtons() {
     let retryBtn = document.getElementById('retry-button');
+    let homeBtn = document.getElementById('home-button');
+
     if (retryBtn) {
         retryBtn.onclick = () => {
-            location.reload();
+            startLevel();
         };
+    }
+
+    if (homeBtn) {
+        homeBtn.onclick = () => {
+            returnToStartView();
+        };
+    }
+}
+
+/**
+ * Blendet den Endscreen-Aktionsbereich aus.
+ */
+function hideEndscreenActions() {
+    let actionContainer = document.getElementById('endscreen-actions');
+    if (actionContainer) {
+        actionContainer.classList.remove('visible');
+        actionContainer.setAttribute('aria-hidden', 'true');
     }
 }
 
@@ -167,6 +257,16 @@ function hideCanvasInfoButtons() {
 }
 
 /**
+ * Blendet die Info-Buttons auf dem Canvas ein.
+ */
+function showCanvasInfoButtons() {
+    let infoButtons = document.getElementById('canvas-info-buttons');
+    if (infoButtons) {
+        infoButtons.classList.remove('d_none');
+    }
+}
+
+/**
  * Prueft, ob Eingaben aktuell gesperrt sind (z. B. nach Game-Over).
  */
 function isInputLocked() {
@@ -202,6 +302,8 @@ function setupMobileButton(buttonId, keyboardKey) {
 
 // Start button: show the game only when user clicks Start
 document.addEventListener('DOMContentLoaded', () => {
+    init();
+
     // Setup orientation handler
     setupOrientationHandler();
     setupInformationButtons();
@@ -213,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startScreen.classList.add('hidden');
             hideCanvasInfoButtons();
             closeAllInfoOverlays();
-            init();
+            startLevel();
         };
     }
 });

@@ -21,6 +21,8 @@ class World {
     loseImage = new Image();
     overlayType = null; // 'win' or 'lose'
     overlayAlpha = 0;
+    animationFrameId = null;
+    isActive = true;
 
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
@@ -214,12 +216,36 @@ class World {
         this.overlayType = type;
         this.gameOver = true;
         this.freezeGame();
-        this.showRetryButton();
+        this.showEndscreenButtons();
     }
 
-    showRetryButton() {
-        let btn = document.getElementById('retry-button');
-        if (btn) btn.classList.add('visible');
+    showEndscreenButtons() {
+        let actionContainer = document.getElementById('endscreen-actions');
+        if (actionContainer) {
+            actionContainer.classList.add('visible');
+            actionContainer.setAttribute('aria-hidden', 'false');
+        }
+    }
+
+    hideEndscreenButtons() {
+        let actionContainer = document.getElementById('endscreen-actions');
+        if (actionContainer) {
+            actionContainer.classList.remove('visible');
+            actionContainer.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    /**
+     * Stoppt die aktuelle World sauber, damit bei einem Neustart keine alten Render-Loops weiterlaufen.
+     */
+    dispose() {
+        this.isActive = false;
+        this.freezeGame();
+        this.hideEndscreenButtons();
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
     }
 
     checkCollisions() {
@@ -278,11 +304,14 @@ class World {
     }
 
     draw() {
+        if (!this.isActive) {
+            return;
+        }
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.drawWorldObjects();
         this.drawUI();
         this.drawCharacter();
-        requestAnimationFrame(() => this.draw());
+        this.animationFrameId = requestAnimationFrame(() => this.draw());
         if (this.gameOver) {
             this.drawOverlay();
         }
