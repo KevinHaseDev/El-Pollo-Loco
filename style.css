@@ -102,6 +102,109 @@ canvas {
     box-shadow: 0 6px 10px rgba(0,0,0,0.35);
 }
 
+.d_none {
+    display: none !important;
+}
+
+.canvas_info_buttons {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    width: min(700px, calc(95vw - 20px));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2100;
+}
+
+.canvas_info_button {
+    border: none;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.72);
+    color: #ffffff;
+    font-family: "Rye", Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.canvas_info_button:hover {
+    transform: translateY(-1px);
+    background: rgba(198, 102, 47, 0.92);
+}
+
+.info_overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(0, 0, 0, 0.66);
+    z-index: 2600;
+}
+
+.info_overlay_card {
+    width: min(700px, 95vw);
+    max-height: min(80vh, 430px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: #fff3df;
+    color: #2d1707;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+
+.info_overlay_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #c6662f;
+    color: #fff;
+}
+
+.info_overlay_header h2 {
+    margin: 0;
+    font-family: "Rye", Arial, Helvetica, sans-serif;
+    font-size: 24px;
+}
+
+.info_close_button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.info_overlay_body {
+    padding: 14px 16px 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    line-height: 1.35;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.info_overlay_body h3 {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    font-family: "Rye", Arial, Helvetica, sans-serif;
+    font-size: 19px;
+    color: #8b4513;
+}
+
 /* Start screen overlay: positioned over the canvas within .game-area */
 .start_screen {
     position: absolute;
@@ -207,6 +310,24 @@ canvas {
     .mobile_controls {
         padding: 0 20px;
         bottom: 15px;
+    }
+
+    .canvas_info_buttons {
+        width: calc(95vw - 16px);
+        bottom: 10px;
+    }
+
+    .canvas_info_button {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .info_overlay {
+        padding: 10px;
+    }
+
+    .info_overlay_card {
+        max-height: 86vh;
     }
 }
 

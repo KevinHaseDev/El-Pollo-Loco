@@ -84,6 +84,91 @@ function setupMobileControls() {
     applyRightGroupShift();
 }
 
+/**
+ * Richtet die Buttons fuer Impressum und Spielbeschreibung ein.
+ * Die Overlays koennen ueber Buttons geoeffnet und wieder geschlossen werden.
+ */
+function setupInformationButtons() {
+    let imprintButton = document.getElementById('imprint-button');
+    let descriptionButton = document.getElementById('description-button');
+    let closeButtons = document.querySelectorAll('.info_close_button');
+    let overlays = document.querySelectorAll('.info_overlay');
+
+    if (imprintButton) {
+        imprintButton.onclick = () => {
+            openInfoOverlay('imprint-overlay');
+        };
+    }
+
+    if (descriptionButton) {
+        descriptionButton.onclick = () => {
+            openInfoOverlay('description-overlay');
+        };
+    }
+
+    for (let index = 0; index < closeButtons.length; index++) {
+        closeButtons[index].onclick = () => {
+            let overlayId = closeButtons[index].getAttribute('data-close-overlay');
+            closeInfoOverlay(overlayId);
+        };
+    }
+
+    for (let index = 0; index < overlays.length; index++) {
+        overlays[index].onclick = (event) => {
+            if (event.target === overlays[index]) {
+                closeInfoOverlay(overlays[index].id);
+            }
+        };
+    }
+}
+
+/**
+ * Oeffnet ein Overlay anhand seiner ID und schliesst vorher ggf. andere Overlays.
+ */
+function openInfoOverlay(overlayId) {
+    closeAllInfoOverlays();
+    let overlay = document.getElementById(overlayId);
+    if (overlay) {
+        overlay.classList.remove('d_none');
+        overlay.setAttribute('aria-hidden', 'false');
+    }
+}
+
+/**
+ * Schliesst ein Overlay anhand seiner ID.
+ */
+function closeInfoOverlay(overlayId) {
+    let overlay = document.getElementById(overlayId);
+    if (overlay) {
+        overlay.classList.add('d_none');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+}
+
+/**
+ * Schliesst alle vorhandenen Info-Overlays.
+ */
+function closeAllInfoOverlays() {
+    let overlays = document.querySelectorAll('.info_overlay');
+    for (let index = 0; index < overlays.length; index++) {
+        overlays[index].classList.add('d_none');
+        overlays[index].setAttribute('aria-hidden', 'true');
+    }
+}
+
+/**
+ * Blendet die Info-Buttons auf dem Canvas aus.
+ */
+function hideCanvasInfoButtons() {
+    let infoButtons = document.getElementById('canvas-info-buttons');
+    if (infoButtons) {
+        infoButtons.classList.add('d_none');
+    }
+}
+
+/**
+ * Richtet die Eingabelogik fuer einen mobilen Steuerungsbutton ein.
+ */
 function setupMobileButton(buttonId, keyboardKey) {
     let btn = document.getElementById(buttonId);
     if (btn) {
@@ -110,14 +195,17 @@ function setupMobileButton(buttonId, keyboardKey) {
 document.addEventListener('DOMContentLoaded', () => {
     // Setup orientation handler
     setupOrientationHandler();
+    setupInformationButtons();
     
     let startBtn = document.getElementById('start-button');
     let startScreen = document.getElementById('start-screen');
     if (startBtn && startScreen) {
-        startBtn.addEventListener('click', () => {
+        startBtn.onclick = () => {
             startScreen.classList.add('hidden');
+            hideCanvasInfoButtons();
+            closeAllInfoOverlays();
             init();
-        });
+        };
     }
 });
 

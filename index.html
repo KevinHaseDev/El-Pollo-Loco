@@ -51,6 +51,45 @@
             <button id="start-button" class="game_button">Start Game</button>
         </div>
 
+        <div id="canvas-info-buttons" class="canvas_info_buttons">
+            <button id="imprint-button" class="canvas_info_button">Impressum</button>
+            <button id="description-button" class="canvas_info_button">Steuerung</button>
+        </div>
+
+        <section id="imprint-overlay" class="info_overlay d_none" aria-hidden="true">
+            <article class="info_overlay_card" role="dialog" aria-modal="true" aria-labelledby="imprint-title">
+                <header class="info_overlay_header">
+                    <h2 id="imprint-title">Impressum</h2>
+                    <button class="info_close_button" data-close-overlay="imprint-overlay" aria-label="Impressum schliessen">X</button>
+                </header>
+                <div class="info_overlay_body">
+                    <p>Angaben gemaess Paragraph 5 TMG</p>
+                    <p>Max Mustermann</p>
+                    <p>Musterstrasse 12</p>
+                    <p>12345 Musterstadt</p>
+                    <p>Deutschland</p>
+                    <p>E-Mail: max@example.com</p>
+                </div>
+            </article>
+        </section>
+
+        <section id="description-overlay" class="info_overlay d_none" aria-hidden="true">
+            <article class="info_overlay_card" role="dialog" aria-modal="true" aria-labelledby="description-title">
+                <header class="info_overlay_header">
+                    <h2 id="description-title">Steuerung</h2>
+                    <button class="info_close_button" data-close-overlay="description-overlay" aria-label="Steuerung schliessen">X</button>
+                </header>
+                <div class="info_overlay_body">
+                    <p>In El Pollo Loco kämpfst du dich durch die Wüste, sammelst Münzen und Flaschen und besiegst am Ende den Boss.</p>
+                    <h3>Steuerung</h3>
+                    <p>A oder Pfeil Links: Nach links laufen</p>
+                    <p>D oder Pfeil Rechts: Nach rechts laufen</p>
+                    <p>W oder Pfeil Hoch: Springen</p>
+                    <p>Leertaste: Flasche werfen</p>
+                </div>
+            </article>
+        </section>
+
         <div class="mobile_controls" id="mobile-controls">
             <div class="mobile_controls_left">
                 <button class="mobile_btn" id="btn-left" aria-label="Move Left">◄</button>
