@@ -398,8 +398,8 @@ canvas {
     opacity: 0.9;
 }
 
-/* Zeige Portrait Overlay nur im Hochformat auf kleineren/weniger breiten Geräten */
-@media (orientation: portrait) and (max-width: 1050px) {
+/* Zeige Portrait Overlay nur im Hochformat bis inkl. 1024px Breite */
+@media (orientation: portrait) and (max-width: 1024px) {
     .portrait_overlay {
         display: flex;
     }

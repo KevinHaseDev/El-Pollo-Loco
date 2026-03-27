@@ -92,6 +92,7 @@ class Character extends MovableObject {
 
     animate() {
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             this.getRealFrame();
             if (this.world.keyboard.right && this.x < this.world.level.level_end_x) {
                 this.moveCharacterToRight();
@@ -127,6 +128,7 @@ class Character extends MovableObject {
 
     controlCharacterAnimation() {
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             let idleDuration = (new Date().getTime() - this.idleStartTime) / 1000;
             if (this.isHurt()) {
                 this.hurtAnimation();

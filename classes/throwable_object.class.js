@@ -45,6 +45,7 @@ class ThrowableObject extends MovableObject {
         this.speedY = 25;
         this.applyGravity();
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             this.getRealFrame();
             this.playAnimation(this.images_rotating);
             this.x += 8;

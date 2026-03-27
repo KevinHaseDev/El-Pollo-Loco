@@ -33,6 +33,7 @@ class SmallChicken extends MovableObject {
 
     animate() {
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             if (!this.isDead()) {
                 this.moveLeft();
                 this.playAnimation(this.images_walking);

@@ -35,10 +35,10 @@ class Endboss extends MovableObject {
     realWidth;
     realHeight;
     offset = {
-        left: 10,
-        right: 10,
-        top: 10,
-        bottom: 10
+        left: 70,
+        right: 70,
+        top: 80,
+        bottom: 60
     };
     deadtimer = 0;
     // smooth-hurt / death helpers
@@ -69,6 +69,7 @@ class Endboss extends MovableObject {
     }
     handleEndbossMovement() {
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             if (!this.isDead()) {
                 // Pause regular movement while hurt to emphasize knockback
                 const now = new Date().getTime();
@@ -92,6 +93,7 @@ class Endboss extends MovableObject {
     handleEndbossBehavior() {
         // Faster tick for responsive animation transitions
         setInterval(() => {
+            if (this.world && this.world.frozen) return;
             this.getRealFrame();
             if (this.isHurt()) {
                 this.performHurtBehaviorEndboss();

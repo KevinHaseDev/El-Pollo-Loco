@@ -42,7 +42,7 @@ function checkOrientation() {
     if (!overlay) return;
     
     let isPortrait = window.innerHeight > window.innerWidth;
-    let isSmallDevice = window.innerWidth < 900;
+    let isSmallDevice = window.innerWidth <= 1024;
     
     if (isPortrait && isSmallDevice) {
         overlay.style.display = 'flex';
@@ -167,6 +167,13 @@ function hideCanvasInfoButtons() {
 }
 
 /**
+ * Prueft, ob Eingaben aktuell gesperrt sind (z. B. nach Game-Over).
+ */
+function isInputLocked() {
+    return !!(world && world.frozen);
+}
+
+/**
  * Richtet die Eingabelogik fuer einen mobilen Steuerungsbutton ein.
  */
 function setupMobileButton(buttonId, keyboardKey) {
@@ -174,6 +181,7 @@ function setupMobileButton(buttonId, keyboardKey) {
     if (btn) {
         btn.addEventListener('touchstart', (e) => {
             e.preventDefault();
+            if (isInputLocked()) return;
             keyboard[keyboardKey] = true;
         });
         btn.addEventListener('touchend', (e) => {
@@ -182,6 +190,7 @@ function setupMobileButton(buttonId, keyboardKey) {
         });
         btn.addEventListener('mousedown', (e) => {
             e.preventDefault();
+            if (isInputLocked()) return;
             keyboard[keyboardKey] = true;
         });
         btn.addEventListener('mouseup', (e) => {
@@ -210,6 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('keydown', (event) => {
+    if (isInputLocked()) {
+        return;
+    }
     
     if (event.key == 39 || event.key === 'd')
         keyboard.right = true;

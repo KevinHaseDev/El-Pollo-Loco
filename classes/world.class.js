@@ -12,6 +12,10 @@ class World {
     statusBars = [this.healthBar, this.coinBar, this.bottleBar];
     throwableObject = [];
     canThrow = true;
+    totalCoins = 0;
+    totalBottles = 0;
+    collectedCoins = 0;
+    collectedBottles = 0;
     gameOver;
     winImage = new Image();
     loseImage = new Image();
@@ -22,6 +26,7 @@ class World {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
         this.keyboard = keyboard;
+        this.initializeCollectionProgress();
         this.setWorld();
         this.winImage.src = "assets/img/You won, you lost/You Won B.png";
         this.loseImage.src = "assets/img/You won, you lost/You lost.png";
@@ -31,13 +36,76 @@ class World {
 
     setWorld() {
         this.character.world = this;
-        if (this.boss) {
-            this.boss.world = this;
+        this.syncWorldReferences();
+    }
+
+    /**
+     * Setzt die World-Referenz fuer ein Objekt-Array.
+     */
+    assignWorldReference(objectArray) {
+        if (!objectArray) {
+            return;
         }
+        objectArray.forEach((gameObject) => {
+            gameObject.world = this;
+        });
+    }
+
+    /**
+     * Synchronisiert die World-Referenz fuer alle relevanten Objekte.
+     * So reagieren auch spaeter gespawnte Objekte korrekt auf world.frozen.
+     */
+    syncWorldReferences() {
+        this.assignWorldReference(this.level.enemies);
+        this.assignWorldReference(this.level.clouds);
+        this.assignWorldReference(this.level.coins);
+        this.assignWorldReference(this.level.bottles);
+        this.assignWorldReference(this.throwableObject);
+    }
+
+    /**
+     * Initialisiert die Sammel-Fortschrittswerte für Coins und Flaschen.
+     * Die Bars starten bei 0% und füllen sich bis 100%, wenn alle Items eingesammelt wurden.
+     */
+    initializeCollectionProgress() {
+        this.totalCoins = this.level.coins.length;
+        this.totalBottles = this.level.bottles.length;
+        this.collectedCoins = 0;
+        this.collectedBottles = 0;
+        this.updateCoinBarProgress();
+        this.updateBottleBarProgress();
+    }
+
+    /**
+     * Berechnet den prozentualen Sammelfortschritt.
+     * Gibt bei 0 Gesamtitems direkt 100 zurück, um Sonderfälle sauber zu behandeln.
+     */
+    calculateCollectionPercentage(collectedAmount, totalAmount) {
+        if (totalAmount === 0) {
+            return 100;
+        }
+        return Math.min(100, (collectedAmount / totalAmount) * 100);
+    }
+
+    /**
+     * Aktualisiert die Coin-Bar anhand der tatsächlich eingesammelten Coins.
+     */
+    updateCoinBarProgress() {
+        let percentage = this.calculateCollectionPercentage(this.collectedCoins, this.totalCoins);
+        this.coinBar.setPercentage(percentage);
+    }
+
+    /**
+     * Aktualisiert die Bottle-Bar anhand der tatsächlich eingesammelten Flaschen.
+     */
+    updateBottleBarProgress() {
+        let percentage = this.calculateCollectionPercentage(this.collectedBottles, this.totalBottles);
+        this.bottleBar.setPercentage(percentage);
     }
 
     run() {
         this.updateInterval = setInterval(() => {
+            this.syncWorldReferences();
             this.checkCollisions();
             this.checkBottleCollisions();
             this.checkThrowObjects();
@@ -58,7 +126,34 @@ class World {
             clearInterval(this.bossInterval);
             this.bossInterval = null;
         }
+        this.stopSpawnIntervals();
+        this.resetKeyboardInput();
         this.frozen = true;
+    }
+
+    /**
+     * Stoppt die Spawn-Intervalle aus dem Level-Script beim Game-Over.
+     */
+    stopSpawnIntervals() {
+        if (typeof spawnIntervalId !== 'undefined' && spawnIntervalId) {
+            clearInterval(spawnIntervalId);
+            spawnIntervalId = null;
+        }
+        if (typeof cloudSpawnIntervalId !== 'undefined' && cloudSpawnIntervalId) {
+            clearInterval(cloudSpawnIntervalId);
+            cloudSpawnIntervalId = null;
+        }
+    }
+
+    /**
+     * Setzt alle Input-Flags zurueck, damit nach Game-Over keine Aktionen mehr aktiv sind.
+     */
+    resetKeyboardInput() {
+        this.keyboard.left = false;
+        this.keyboard.right = false;
+        this.keyboard.up = false;
+        this.keyboard.down = false;
+        this.keyboard.space = false;
     }
 
     checkThrowObjects() {
@@ -76,10 +171,12 @@ class World {
 
     throwBottle() {
         let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
+        bottle.world = this;
         this.throwableObject.push(bottle);
         this.canThrow = false;
-        this.character.bottleAmount -= 10;
-        this.bottleBar.setPercentage(this.character.bottleAmount);
+        this.character.bottleAmount -= 20;
+        this.collectedBottles = Math.max(0, this.collectedBottles - 1);
+        this.updateBottleBarProgress();
     }
 
     checkBottleCollisions() {
@@ -280,7 +377,8 @@ class World {
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
                 this.character.collectCoin();
-                this.coinBar.setPercentage(this.character.coinAmount);
+                this.collectedCoins++;
+                this.updateCoinBarProgress();
                 this.removeCoin(index);
             }
         });
@@ -294,7 +392,8 @@ class World {
         this.level.bottles.forEach((bottle, index) => {
             if (this.character.isColliding(bottle)) {
                 this.character.collectBottle();
-                this.bottleBar.setPercentage(this.character.bottleAmount);
+                this.collectedBottles++;
+                this.updateBottleBarProgress();
                 this.removeBottle(index);
             }
         });
@@ -304,6 +403,4 @@ class World {
         this.level.bottles.splice(index, 1);
     }
 }
-
-// mobile buttons
 // sounds

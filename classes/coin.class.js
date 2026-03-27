@@ -27,6 +27,7 @@ class Coins extends MovableObject {
 
   animate() {
     setInterval(() => {
+      if (this.world && this.world.frozen) return;
       this.getRealFrame();
       this.playAnimation(this.images_coins);
     }, 100);
