@@ -9,6 +9,9 @@ class HealthBar extends StatusBar {
     ];
     percentage = 100;
 
+    /**
+     * Creates the player health bar.
+     */
     constructor() {
         super(HealthBar.images_health);
         this.setPercentage(100);

@@ -1,4 +1,10 @@
 class Spawner {
+	/**
+	 * Generates a randomized enemy list including one endboss.
+	 * @param {number} minCount Minimum enemy count.
+	 * @param {number} maxCount Maximum enemy count.
+	 * @returns {MovableObject[]} Enemy list.
+	 */
 	generateEnemyList(minCount, maxCount) {
 		let enemyList = [];
 		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
@@ -14,6 +20,10 @@ class Spawner {
 		return enemyList;
 	}
 
+	/**
+	 * Spawns one random enemy and appends it to the list.
+	 * @param {MovableObject[]} enemyArray Existing enemy list.
+	 */
 	spawnRandomEnemy(enemyArray) {
 		if (!enemyArray) {
 			return;
@@ -25,6 +35,12 @@ class Spawner {
 		}
 	}
 
+	/**
+	 * Generates a randomized bottle list.
+	 * @param {number} minCount Minimum bottle count.
+	 * @param {number} maxCount Maximum bottle count.
+	 * @returns {Bottles[]} Bottle list.
+	 */
 	generateBottleList(minCount, maxCount) {
 		let bottleList = [];
 		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
@@ -35,6 +51,10 @@ class Spawner {
 		return bottleList;
 	}
 
+	/**
+	 * Randomly appends one bottle to the provided list.
+	 * @param {Bottles[]} bottleArray Existing bottle list.
+	 */
 	spawnRandomBottle(bottleArray) {
 		if (!bottleArray) {
 			return;
@@ -44,6 +64,12 @@ class Spawner {
 		}
 	}
 
+	/**
+	 * Generates a randomized coin list.
+	 * @param {number} minCount Minimum coin count.
+	 * @param {number} maxCount Maximum coin count.
+	 * @returns {Coins[]} Coin list.
+	 */
 	generateCoinList(minCount, maxCount) {
 		let coinList = [];
 		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
@@ -55,6 +81,10 @@ class Spawner {
 		return coinList;
 	}
 
+	/**
+	 * Randomly appends one coin to the provided list.
+	 * @param {Coins[]} coinArray Existing coin list.
+	 */
 	spawnRandomCoin(coinArray) {
 		if (!coinArray) {
 			return;
@@ -64,6 +94,12 @@ class Spawner {
 		}
 	}
 
+	/**
+	 * Generates a randomized cloud list.
+	 * @param {number} minCount Minimum cloud count.
+	 * @param {number} maxCount Maximum cloud count.
+	 * @returns {Cloud[]} Cloud list.
+	 */
 	generateCloudList(minCount, maxCount) {
 		let cloudList = [];
 		let count = Math.floor(Math.random() * (maxCount - minCount + 1)) + minCount;
@@ -73,6 +109,10 @@ class Spawner {
 		return cloudList;
 	}
 
+	/**
+	 * Randomly appends one cloud to the provided list.
+	 * @param {Cloud[]} cloudArray Existing cloud list.
+	 */
 	spawnRandomCloud(cloudArray) {
 		if (!cloudArray) {
 			return;

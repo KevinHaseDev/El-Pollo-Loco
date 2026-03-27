@@ -17,6 +17,11 @@ class Coins extends MovableObject {
     'assets/img/8_coin/coin_2.png'
   ];
 
+  /**
+   * Creates one coin collectible.
+   * @param {number} x Horizontal world position.
+   * @param {number} y Vertical world position.
+   */
   constructor(x, y) {
     super().loadImage('assets/img/8_coin/coin_1.png');
     this.loadImages(this.images_coins);
@@ -25,6 +30,9 @@ class Coins extends MovableObject {
     this.animate();
   }
 
+  /**
+   * Starts the coin animation loop.
+   */
   animate() {
     setInterval(() => {
       if (this.world && this.world.frozen) return;

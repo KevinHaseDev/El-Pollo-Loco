@@ -9,6 +9,9 @@ class CoinBar extends StatusBar {
     ];
 
 
+    /**
+     * Creates the coin progress bar.
+     */
     constructor() {
         super(CoinBar.images_coins);
         this.setPercentage(0);

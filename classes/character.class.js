@@ -74,10 +74,13 @@ class Character extends MovableObject {
     energy = 100;
     deadtimer = 0;
     coinAmount = 0;
-    bottleAmount = 0
+    bottleAmount = 0;
 
+    /**
+     * Creates the playable character and preloads all animation assets.
+     */
     constructor() {
-        super(120, 400)
+        super(120, 400);
         this.loadImage(this.images_idle[0]);
         this.loadImages(this.images_idle);
         this.loadImages(this.images_idle_long);
@@ -90,63 +93,133 @@ class Character extends MovableObject {
         this.getRealFrame();
     }
 
+    /**
+     * Starts movement and animation update loops.
+     */
     animate() {
-        setInterval(() => {
-            if (this.world && this.world.frozen) return;
-            this.getRealFrame();
-            if (this.world.keyboard.right && this.x < this.world.level.level_end_x) {
-                this.moveCharacterToRight();
-            } else if (this.world.keyboard.left && this.x > 0) {
-                this.moveCharacterToLeft();
-            }
-            if (this.world.keyboard.up && !this.isAboveGround()) {
-                this.triggerJumpAction();
-            }
-            this.world.camera_x = -this.x + 120;
-        }, 1000 / 60);
-
         this.idleStartTime = new Date().getTime();
-        this.controlCharacterAnimation();
+        this.startMovementLoop();
+        this.startAnimationLoop();
     }
 
+    /**
+     * Runs the movement update loop.
+     */
+    startMovementLoop() {
+        setInterval(() => {
+            if (this.world && this.world.frozen) return;
+            this.updateMovementState();
+        }, 1000 / 60);
+    }
+
+    /**
+     * Updates horizontal movement, jump input and camera tracking.
+     */
+    updateMovementState() {
+        this.getRealFrame();
+        this.updateHorizontalMovement();
+        this.updateJumpMovement();
+        this.updateCameraPosition();
+    }
+
+    /**
+     * Moves the character left or right based on keyboard input.
+     */
+    updateHorizontalMovement() {
+        if (this.world.keyboard.right && this.x < this.world.level.levelEndX) {
+            this.moveCharacterToRight();
+            return;
+        }
+        if (this.world.keyboard.left && this.x > 0) {
+            this.moveCharacterToLeft();
+        }
+    }
+
+    /**
+     * Triggers a jump when jump input is active.
+     */
+    updateJumpMovement() {
+        if (this.world.keyboard.up && !this.isAboveGround()) {
+            this.triggerJumpAction();
+        }
+    }
+
+    /**
+     * Updates horizontal camera offset.
+     */
+    updateCameraPosition() {
+        if (!this.world) return;
+        this.world.cameraX = -this.x + 120;
+    }
+
+    /**
+     * Moves the character to the right.
+     */
     moveCharacterToRight() {
         this.moveRight();
         this.otherDirection = false;
         this.idleStartTime = new Date().getTime();
     }
 
+    /**
+     * Moves the character to the left.
+     */
     moveCharacterToLeft() {
         this.moveLeft();
         this.otherDirection = true;
         this.idleStartTime = new Date().getTime();
     }
 
+    /**
+     * Triggers the jump action.
+     */
     triggerJumpAction() {
         this.jump();
         this.idleStartTime = new Date().getTime();
     }
 
-    controlCharacterAnimation() {
+    /**
+     * Runs the animation selection loop.
+     */
+    startAnimationLoop() {
         setInterval(() => {
             if (this.world && this.world.frozen) return;
-            let idleDuration = (new Date().getTime() - this.idleStartTime) / 1000;
-            if (this.isHurt()) {
-                this.hurtAnimation();
-                return;
-            }
-            if (this.isDead()) {
-                this.deadtimer++;
-                this.deadAnimation();
-                return;
-            }
-            if (this.isAboveGround()) {
-                this.playAnimation(this.images_jumping);
-                return;
-            }
-            this.selectAnimation(idleDuration);
+            this.updateAnimationState();
         }, 100);
     }
 
+    /**
+     * Selects the active animation based on character state.
+     */
+    updateAnimationState() {
+        let idleDuration = (new Date().getTime() - this.idleStartTime) / 1000;
+        if (this.playPriorityAnimation()) return;
+        this.selectAnimation(idleDuration);
+    }
+
+    /**
+     * Plays hurt, dead, or jump animation if one has priority.
+     * @returns {boolean} True when a priority animation was played.
+     */
+    playPriorityAnimation() {
+        if (this.isHurt()) {
+            this.hurtAnimation();
+            return true;
+        }
+        if (this.isDead()) {
+            this.deadtimer++;
+            this.deadAnimation();
+            return true;
+        }
+        if (!this.isAboveGround()) return false;
+        this.playAnimation(this.images_jumping);
+        return true;
+    }
+
+    /**
+     * Selects idle or walking animation depending on input and idle time.
+     * @param {number} idleDuration Idle duration in seconds.
+     */
     selectAnimation(idleDuration) {
         if (this.world.keyboard.right || this.world.keyboard.left) {
             this.playAnimation(this.images_walking);
@@ -157,19 +230,30 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Plays the hurt animation sequence.
+     */
     hurtAnimation() {
         this.playAnimation(this.images_hurt);
     }
 
+    /**
+     * Plays the death animation sequence.
+     */
     deadAnimation() {
-
         this.playAnimation(this.images_dead);
     }
 
+    /**
+     * Increases collected coin amount.
+     */
     collectCoin() {
         this.coinAmount += 20;
     }
 
+    /**
+     * Increases collected bottle amount.
+     */
     collectBottle() {
         this.bottleAmount += 20;
     }

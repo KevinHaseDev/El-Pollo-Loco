@@ -20,6 +20,9 @@ class SmallChicken extends MovableObject {
     }
     deadtimer = 0;
 
+    /**
+     * Creates a small chicken enemy.
+     */
     constructor() {
         super(100, 300);
         this.energy = 10;
@@ -31,6 +34,9 @@ class SmallChicken extends MovableObject {
         this.speed = 0.5 + Math.random() * 0.35;
     }
 
+    /**
+     * Starts enemy movement and animation loop.
+     */
     animate() {
         setInterval(() => {
             if (this.world && this.world.frozen) return;

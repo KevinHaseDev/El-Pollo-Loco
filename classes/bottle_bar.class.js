@@ -8,6 +8,9 @@ class BottleBar extends StatusBar {
         './assets/img/7_statusbars/1_statusbar/3_statusbar_bottle/orange/100.png'
     ];
 
+    /**
+     * Creates the bottle progress bar.
+     */
     constructor() {
         super(BottleBar.images_bottles);
         this.setPercentage(0);

@@ -10,6 +10,11 @@ class EndbossBar extends StatusBar {
 
   percentage = 100;
 
+  /**
+   * Creates the endboss health bar.
+   * @param {number} x Horizontal draw position.
+   * @param {number} y Vertical draw position.
+   */
   constructor(x, y) {
     super(EndbossBar.endboss_healthbar);
     this.x = x;
@@ -20,6 +25,10 @@ class EndbossBar extends StatusBar {
     this.setPercentage(100);
   }
 
+  /**
+   * Toggles visibility and dimensions of the endboss health bar.
+   * @param {boolean} isVisible Visibility flag.
+   */
   setVisibility(isVisible) {
     this.visible = isVisible;
     if (!this.visible) {

@@ -2,12 +2,18 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 
+/**
+ * Initializes canvas and static control bindings.
+ */
 function init() {
     canvas = document.getElementById('canvas');
     setupEndscreenButtons();
     setupMobileControls();
 }
 
+/**
+ * Starts a fresh game world and resets UI state.
+ */
 function startLevel() {
     stopRunningWorld();
 
@@ -27,6 +33,9 @@ function startLevel() {
 }
 
 
+/**
+ * Disposes the active world instance.
+ */
 function stopRunningWorld() {
     if (world && typeof world.dispose === 'function') {
         world.dispose();
@@ -34,6 +43,9 @@ function stopRunningWorld() {
     world = null;
 }
 
+/**
+ * Resets all keyboard input flags.
+ */
 function resetKeyboardState() {
     keyboard.left = false;
     keyboard.right = false;
@@ -42,6 +54,9 @@ function resetKeyboardState() {
     keyboard.space = false;
 }
 
+/**
+ * Returns the game from gameplay view to the start screen.
+ */
 function returnToStartView() {
     stopRunningWorld();
     resetKeyboardState();
@@ -56,6 +71,9 @@ function returnToStartView() {
     }
 }
 
+/**
+ * Shows mobile controls.
+ */
 function showMobileControls() {
     let mobileControls = document.getElementById('mobile-controls');
     if (mobileControls) {
@@ -63,6 +81,9 @@ function showMobileControls() {
     }
 }
 
+/**
+ * Hides mobile controls.
+ */
 function hideMobileControls() {
     let mobileControls = document.getElementById('mobile-controls');
     if (mobileControls) {
@@ -70,12 +91,18 @@ function hideMobileControls() {
     }
 }
 
+/**
+ * Registers orientation-related event handlers.
+ */
 function setupOrientationHandler() {
     checkOrientation();
     window.addEventListener('orientationchange', checkOrientation);
     window.addEventListener('resize', checkOrientation);
 }
 
+/**
+ * Toggles orientation overlay based on current viewport orientation.
+ */
 function checkOrientation() {
     let overlay = document.getElementById('portrait-overlay');
     if (!overlay) return;
@@ -90,6 +117,9 @@ function checkOrientation() {
     }
 }
 
+/**
+ * Binds endscreen action buttons.
+ */
 function setupEndscreenButtons() {
     let retryBtn = document.getElementById('retry-button');
     let homeBtn = document.getElementById('home-button');
@@ -107,6 +137,9 @@ function setupEndscreenButtons() {
     }
 }
 
+/**
+ * Hides endscreen action buttons and updates aria state.
+ */
 function hideEndscreenActions() {
     let actionContainer = document.getElementById('endscreen-actions');
     if (actionContainer) {
@@ -115,6 +148,9 @@ function hideEndscreenActions() {
     }
 }
 
+/**
+ * Moves the right mobile control group slightly left.
+ */
 function applyRightGroupShift() {
     let rightGroup = document.querySelector('.mobile_controls_right');
     if (rightGroup && !rightGroup.classList.contains('shift-left')) {
@@ -122,6 +158,9 @@ function applyRightGroupShift() {
     }
 }
 
+/**
+ * Sets up all mobile gameplay buttons.
+ */
 function setupMobileControls() {
     setupMobileButton('btn-left', 'left');
     setupMobileButton('btn-right', 'right');
@@ -130,6 +169,9 @@ function setupMobileControls() {
     applyRightGroupShift();
 }
 
+/**
+ * Binds info overlay open and close interactions.
+ */
 function setupInformationButtons() {
     let imprintButton = document.getElementById('imprint-button');
     let descriptionButton = document.getElementById('description-button');
@@ -164,6 +206,10 @@ function setupInformationButtons() {
     }
 }
 
+/**
+ * Opens a specific info overlay and hides all others.
+ * @param {string} overlayId The id of the overlay to open.
+ */
 function openInfoOverlay(overlayId) {
     closeAllInfoOverlays();
     let overlay = document.getElementById(overlayId);
@@ -173,6 +219,10 @@ function openInfoOverlay(overlayId) {
     }
 }
 
+/**
+ * Closes a specific info overlay.
+ * @param {string} overlayId The id of the overlay to close.
+ */
 function closeInfoOverlay(overlayId) {
     let overlay = document.getElementById(overlayId);
     if (overlay) {
@@ -181,6 +231,9 @@ function closeInfoOverlay(overlayId) {
     }
 }
 
+/**
+ * Closes all info overlays.
+ */
 function closeAllInfoOverlays() {
     let overlays = document.querySelectorAll('.info_overlay');
     for (let index = 0; index < overlays.length; index++) {
@@ -189,6 +242,9 @@ function closeAllInfoOverlays() {
     }
 }
 
+/**
+ * Hides the canvas info button row.
+ */
 function hideCanvasInfoButtons() {
     let infoButtons = document.getElementById('canvas-info-buttons');
     if (infoButtons) {
@@ -196,6 +252,9 @@ function hideCanvasInfoButtons() {
     }
 }
 
+/**
+ * Shows the canvas info button row.
+ */
 function showCanvasInfoButtons() {
     let infoButtons = document.getElementById('canvas-info-buttons');
     if (infoButtons) {
@@ -203,10 +262,19 @@ function showCanvasInfoButtons() {
     }
 }
 
+/**
+ * Returns whether player input is currently blocked.
+ * @returns {boolean} True when input is locked.
+ */
 function isInputLocked() {
     return !!(world && world.frozen);
 }
 
+/**
+ * Binds touch and mouse handlers to one mobile control button.
+ * @param {string} buttonId DOM id of the button.
+ * @param {string} keyboardKey Keyboard state key to toggle.
+ */
 function setupMobileButton(buttonId, keyboardKey) {
     let btn = document.getElementById(buttonId);
     if (btn) {
@@ -266,6 +334,7 @@ window.addEventListener('keydown', (event) => {
     
 
 });
+
 window.addEventListener('keyup', (event) => {
     if (event.key == 39 || event.key === 'd')
         keyboard.right = false;

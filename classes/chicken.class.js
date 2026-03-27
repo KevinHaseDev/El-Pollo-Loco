@@ -22,8 +22,11 @@ class Chicken extends MovableObject {
     }
     deadtimer = 0;
 
+    /**
+     * Creates a regular chicken enemy.
+     */
     constructor() {
-        super(100, 300)
+        super(100, 300);
         this.energy = 10;
         this.x = 600 + Math.random() * 3500;
         this.loadImage(this.images_walking[0]);
@@ -33,6 +36,9 @@ class Chicken extends MovableObject {
         this.speed = 2.2 + Math.random() * 0.35;
     }
 
+    /**
+     * Starts enemy movement and animation loop.
+     */
     animate() {
         setInterval(() => {
             if (this.world && this.world.frozen) return;
@@ -41,6 +47,13 @@ class Chicken extends MovableObject {
                 this.playAnimation(this.images_walking);
                 this.getRealFrame();
             } else {
+                this.offset = {
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    bottom: 0
+                };
+                this.getRealFrame();
                 this.deadtimer++;
                 this.playAnimation([this.images_dead[0]]);
             }

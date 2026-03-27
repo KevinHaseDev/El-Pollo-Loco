@@ -28,7 +28,13 @@ class ThrowableObject extends MovableObject {
         bottom: 5,
         left: 15,
         right: 15
-    }
+    };
+
+    /**
+     * Creates a throwable bottle object.
+     * @param {number} x Horizontal world position.
+     * @param {number} y Vertical world position.
+     */
     constructor(x, y) {
         super().loadImage('./assets/img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png');
         this.loadImages(this.images_rotating);
@@ -40,6 +46,9 @@ class ThrowableObject extends MovableObject {
         this.throw();
     }
 
+    /**
+     * Launches the throwable object with gravity and rotation animation.
+     */
     throw() {
         this.isThrown = true;
         this.speedY = 25;

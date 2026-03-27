@@ -1,10 +1,10 @@
 class World {
     character = new Character();
-    level = level_one;
+    level = levelOne;
     canvas;
     ctx;
     keyboard;
-    camera_x = 0;
+    cameraX = 0;
     healthBar = new HealthBar();
     coinBar = new CoinBar();
     bottleBar = new BottleBar();
@@ -24,6 +24,7 @@ class World {
     animationFrameId = null;
     isActive = true;
 
+    /** Creates a playable world bound to one canvas and keyboard instance. */
     constructor(canvas, keyboard) {
         this.ctx = canvas.getContext("2d");
         this.canvas = canvas;
@@ -36,11 +37,13 @@ class World {
         this.run();
     }
 
+    /** Assigns world reference to character and all entity groups. */
     setWorld() {
         this.character.world = this;
         this.syncWorldReferences();
     }
 
+    /** Assigns world reference to each object in the provided list. */
     assignWorldReference(objectArray) {
         if (!objectArray) {
             return;
@@ -50,6 +53,7 @@ class World {
         });
     }
 
+    /** Synchronizes world references for all active entity lists. */
     syncWorldReferences() {
         this.assignWorldReference(this.level.enemies);
         this.assignWorldReference(this.level.clouds);
@@ -58,6 +62,7 @@ class World {
         this.assignWorldReference(this.throwableObject);
     }
 
+    /** Initializes collectible progress counters and bars. */
     initializeCollectionProgress() {
         this.totalCoins = this.level.coins.length;
         this.totalBottles = this.level.bottles.length;
@@ -67,6 +72,7 @@ class World {
         this.updateBottleBarProgress();
     }
 
+    /** Calculates collection percentage from current and total values. */
     calculateCollectionPercentage(collectedAmount, totalAmount) {
         if (totalAmount === 0) {
             return 100;
@@ -74,16 +80,19 @@ class World {
         return Math.min(100, (collectedAmount / totalAmount) * 100);
     }
 
+    /** Updates the coin status bar based on collection progress. */
     updateCoinBarProgress() {
         let percentage = this.calculateCollectionPercentage(this.collectedCoins, this.totalCoins);
         this.coinBar.setPercentage(percentage);
     }
 
+    /** Updates the bottle status bar based on collection progress. */
     updateBottleBarProgress() {
         let percentage = this.calculateCollectionPercentage(this.collectedBottles, this.totalBottles);
         this.bottleBar.setPercentage(percentage);
     }
 
+    /** Starts main world update loops. */
     run() {
         this.updateInterval = setInterval(() => {
             this.syncWorldReferences();
@@ -98,6 +107,7 @@ class World {
         }, 200);
     }
 
+    /** Freezes all runtime loops, input, and spawning. */
     freezeGame() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
@@ -112,6 +122,7 @@ class World {
         this.frozen = true;
     }
 
+    /** Stops globally registered spawn intervals if available. */
     stopSpawnIntervals() {
         if (typeof spawnIntervalId !== 'undefined' && spawnIntervalId) {
             clearInterval(spawnIntervalId);
@@ -123,6 +134,7 @@ class World {
         }
     }
 
+    /** Resets all keyboard inputs to false. */
     resetKeyboardInput() {
         this.keyboard.left = false;
         this.keyboard.right = false;
@@ -131,6 +143,7 @@ class World {
         this.keyboard.space = false;
     }
 
+    /** Handles bottle throwing input and cooldown state. */
     checkThrowObjects() {
         if (this.canThrowBottle()) {
             this.throwBottle();
@@ -140,10 +153,12 @@ class World {
         }
     }
 
+    /** Returns true when a bottle can be thrown. */
     canThrowBottle() {
         return this.character.bottleAmount > 0 && this.keyboard.space && this.canThrow;
     }
 
+    /** Creates and launches one throwable bottle object. */
     throwBottle() {
         let bottle = new ThrowableObject(this.character.x + 100, this.character.y + 100);
         bottle.world = this;
@@ -154,6 +169,7 @@ class World {
         this.updateBottleBarProgress();
     }
 
+    /** Checks collisions between throwable bottles and enemies. */
     checkBottleCollisions() {
         this.throwableObject.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
@@ -164,6 +180,7 @@ class World {
         });
     }
 
+    /** Applies bottle hit behavior against one enemy. */
     handleBottleEnemyCollision(bottle, enemy) {
         if (bottle.isColliding(enemy)) {
             enemy.hit();
@@ -171,12 +188,14 @@ class World {
         }
     }
 
+    /** Removes an enemy from level list after death timer threshold. */
     cleanupDeadEnemy(enemy) {
         if (enemy.deadtimer > 20) {
             this.level.enemies = this.level.enemies.filter(e => e !== enemy);
         }
     }
 
+    /** Triggers win state when boss has no energy left. */
     checkBossDefeat() {
         if (this.boss.isDead()) {
             setTimeout(() => {
@@ -185,6 +204,7 @@ class World {
         }
     }
 
+    /** Sets game-over state and displays endscreen actions. */
     triggerGameEnd(type) {
         this.overlayType = type;
         this.gameOver = true;
@@ -192,6 +212,7 @@ class World {
         this.showEndscreenButtons();
     }
 
+    /** Shows endscreen action buttons and updates aria state. */
     showEndscreenButtons() {
         let actionContainer = document.getElementById('endscreen-actions');
         if (actionContainer) {
@@ -200,6 +221,7 @@ class World {
         }
     }
 
+    /** Hides endscreen action buttons and updates aria state. */
     hideEndscreenButtons() {
         let actionContainer = document.getElementById('endscreen-actions');
         if (actionContainer) {
@@ -208,6 +230,7 @@ class World {
         }
     }
 
+    /** Disposes world resources and stops rendering loop. */
     dispose() {
         this.isActive = false;
         this.freezeGame();
@@ -218,9 +241,10 @@ class World {
         }
     }
 
+    /** Checks character collisions against all active enemies. */
     checkCollisions() {
         this.level.enemies.forEach((enemy) => {
-            const didJumpOn = this.handleJumpOnEnemy(enemy);
+            let didJumpOn = this.handleJumpOnEnemy(enemy);
             if (!didJumpOn) {
                 this.handleCharacterHitByEnemy(enemy);
             }
@@ -228,7 +252,11 @@ class World {
         });
     }
 
+    /** Handles jump-on-enemy collision behavior. */
     handleJumpOnEnemy(enemy) {
+        if (enemy.isDead()) {
+            return false;
+        }
         if (this.character.isColliding(enemy) && this.character.isAboveGround() && this.character.speedY < 0) {
             enemy.hit();
             this.character.speedY = 15;
@@ -237,7 +265,11 @@ class World {
         return false;
     }
 
+    /** Handles enemy damage to character on collision. */
     handleCharacterHitByEnemy(enemy) {
+        if (enemy.isDead()) {
+            return;
+        }
         if (this.character.isColliding(enemy) && !this.isJumpingOnEnemy()) {
             this.character.hit();
             this.healthBar.setPercentage(this.character.energy);
@@ -245,10 +277,12 @@ class World {
         }
     }
 
+    /** Returns true when character is currently jumping downward onto enemies. */
     isJumpingOnEnemy() {
         return this.character.isAboveGround() && this.character.speedY < 0;
     }
 
+    /** Triggers lose state when character is dead. */
     checkCharacterDeath() {
         if (this.character.isDead()) {
             setTimeout(() => {
@@ -257,18 +291,21 @@ class World {
         }
     }
 
+    /** Removes enemy after death animation timer threshold. */
     removeDeadEnemy(enemy) {
         if (enemy.deadtimer > 10) {
             this.level.enemies = this.level.enemies.filter(e => e !== enemy);
         }
     }
 
+    /** Starts boss animation once player reaches endboss area. */
     checkBossShouldMove() {
         if (this.character.x >= 3595) {
             this.boss.animate();
         }
     }
 
+    /** Draws one full frame of the world and overlay states. */
     draw() {
         if (!this.isActive) {
             return;
@@ -283,8 +320,9 @@ class World {
         }
     }
 
+    /** Draws all scrollable world objects in camera space. */
     drawWorldObjects() {
-        this.ctx.translate(this.camera_x, 0);
+        this.ctx.translate(this.cameraX, 0);
         this.addObjectToMap(this.level.backgroundObjects);
         this.addObjectToMap(this.level.clouds);
         this.addObjectToMap(this.level.enemies);
@@ -292,19 +330,22 @@ class World {
         this.addObjectToMap(this.level.coins);
         if (this.boss) { this.addToMap(this.boss.endbossBar); }
         this.addObjectToMap(this.throwableObject);
-        this.ctx.translate(-this.camera_x, 0);
+        this.ctx.translate(-this.cameraX, 0);
     }
 
+    /** Draws all fixed UI status bars. */
     drawUI() {
         this.addObjectToMap(this.statusBars);
     }
 
+    /** Draws the main character in camera space. */
     drawCharacter() {
-        this.ctx.translate(this.camera_x, 0);
+        this.ctx.translate(this.cameraX, 0);
         this.addToMap(this.character);
-        this.ctx.translate(-this.camera_x, 0);
+        this.ctx.translate(-this.cameraX, 0);
     }
 
+    /** Draws win/lose overlay or fallback text overlay. */
     drawOverlay() {
         this.ctx.save();
         let img = this.overlayType === 'win' ? this.winImage : this.loseImage;
@@ -316,6 +357,7 @@ class World {
         this.ctx.restore();
     }
 
+    /** Draws a simple text fallback overlay when image is unavailable. */
     drawFallbackOverlay() {
         this.ctx.fillStyle = 'rgba(0,0,0,0.6)';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -327,6 +369,7 @@ class World {
         this.ctx.restore();
     }
 
+    /** Draws and fades in the win/lose overlay image. */
     drawImageOverlay(img) {
         this.overlayAlpha = Math.min(1, this.overlayAlpha + 0.02);
         this.ctx.globalAlpha = this.overlayAlpha;
@@ -339,12 +382,14 @@ class World {
         this.ctx.globalAlpha = 1;
     }
 
+    /** Draws each object from an array into the world map. */
     addObjectToMap(objectArray) {
         objectArray.forEach(obj => {
             this.addToMap(obj);
         });
     }
 
+    /** Draws one map object including optional flip transform. */
     addToMap(mo) {
         if (mo.otherDirection) {
             this.flipImage(mo);
@@ -356,6 +401,7 @@ class World {
         this.ctx.restore();
     }
 
+    /** Flips the drawing context for mirrored sprites. */
     flipImage(mo) {
         this.ctx.save();
         this.ctx.translate(mo.width, 0);
@@ -363,11 +409,13 @@ class World {
         mo.x = mo.x * -1;
     }
 
+    /** Restores drawing context after sprite flip. */
     flipImageBack(mo) {
         this.ctx.restore();
         mo.x = mo.x * -1;
     }
 
+    /** Checks coin pickups and updates collection progress. */
     checkCollisionCoin() {
         this.level.coins.forEach((coin, index) => {
             if (this.character.isColliding(coin)) {
@@ -379,10 +427,12 @@ class World {
         });
     }
 
+    /** Removes one collected coin by array index. */
     removeCoin(index) {
         this.level.coins.splice(index, 1);
     }
 
+    /** Checks bottle pickups and updates collection progress. */
     checkCollisionBottle() {
         this.level.bottles.forEach((bottle, index) => {
             if (this.character.isColliding(bottle)) {
@@ -394,6 +444,7 @@ class World {
         });
     }
 
+    /** Removes one collected bottle by array index. */
     removeBottle(index) {
         this.level.bottles.splice(index, 1);
     }

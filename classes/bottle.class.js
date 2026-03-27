@@ -16,6 +16,11 @@ class Bottles extends MovableObject {
     left: 10,
     right: 10
   };
+
+  /**
+   * Creates one bottle collectible at a random or fixed x position.
+   * @param {number} x Horizontal world position.
+   */
   constructor(x) {
     super();
     this.loadImage('assets/img/6_salsa_bottle/1_salsa_bottle_on_ground.png');
@@ -24,6 +29,9 @@ class Bottles extends MovableObject {
     this.animate();
   }
 
+  /**
+   * Starts the bottle idle animation loop.
+   */
   animate() {
     setInterval(() => {
       if (this.world && this.world.frozen) return;
