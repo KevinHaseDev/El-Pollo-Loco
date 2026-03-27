@@ -19,7 +19,7 @@ class World {
     gameOver;
     winImage = new Image();
     loseImage = new Image();
-    overlayType = null; // 'win' or 'lose'
+    overlayType = null;
     overlayAlpha = 0;
     animationFrameId = null;
     isActive = true;
@@ -41,9 +41,6 @@ class World {
         this.syncWorldReferences();
     }
 
-    /**
-     * Setzt die World-Referenz fuer ein Objekt-Array.
-     */
     assignWorldReference(objectArray) {
         if (!objectArray) {
             return;
@@ -53,10 +50,6 @@ class World {
         });
     }
 
-    /**
-     * Synchronisiert die World-Referenz fuer alle relevanten Objekte.
-     * So reagieren auch spaeter gespawnte Objekte korrekt auf world.frozen.
-     */
     syncWorldReferences() {
         this.assignWorldReference(this.level.enemies);
         this.assignWorldReference(this.level.clouds);
@@ -65,10 +58,6 @@ class World {
         this.assignWorldReference(this.throwableObject);
     }
 
-    /**
-     * Initialisiert die Sammel-Fortschrittswerte für Coins und Flaschen.
-     * Die Bars starten bei 0% und füllen sich bis 100%, wenn alle Items eingesammelt wurden.
-     */
     initializeCollectionProgress() {
         this.totalCoins = this.level.coins.length;
         this.totalBottles = this.level.bottles.length;
@@ -78,10 +67,6 @@ class World {
         this.updateBottleBarProgress();
     }
 
-    /**
-     * Berechnet den prozentualen Sammelfortschritt.
-     * Gibt bei 0 Gesamtitems direkt 100 zurück, um Sonderfälle sauber zu behandeln.
-     */
     calculateCollectionPercentage(collectedAmount, totalAmount) {
         if (totalAmount === 0) {
             return 100;
@@ -89,17 +74,11 @@ class World {
         return Math.min(100, (collectedAmount / totalAmount) * 100);
     }
 
-    /**
-     * Aktualisiert die Coin-Bar anhand der tatsächlich eingesammelten Coins.
-     */
     updateCoinBarProgress() {
         let percentage = this.calculateCollectionPercentage(this.collectedCoins, this.totalCoins);
         this.coinBar.setPercentage(percentage);
     }
 
-    /**
-     * Aktualisiert die Bottle-Bar anhand der tatsächlich eingesammelten Flaschen.
-     */
     updateBottleBarProgress() {
         let percentage = this.calculateCollectionPercentage(this.collectedBottles, this.totalBottles);
         this.bottleBar.setPercentage(percentage);
@@ -133,9 +112,6 @@ class World {
         this.frozen = true;
     }
 
-    /**
-     * Stoppt die Spawn-Intervalle aus dem Level-Script beim Game-Over.
-     */
     stopSpawnIntervals() {
         if (typeof spawnIntervalId !== 'undefined' && spawnIntervalId) {
             clearInterval(spawnIntervalId);
@@ -147,9 +123,6 @@ class World {
         }
     }
 
-    /**
-     * Setzt alle Input-Flags zurueck, damit nach Game-Over keine Aktionen mehr aktiv sind.
-     */
     resetKeyboardInput() {
         this.keyboard.left = false;
         this.keyboard.right = false;
@@ -235,9 +208,6 @@ class World {
         }
     }
 
-    /**
-     * Stoppt die aktuelle World sauber, damit bei einem Neustart keine alten Render-Loops weiterlaufen.
-     */
     dispose() {
         this.isActive = false;
         this.freezeGame();
@@ -258,10 +228,8 @@ class World {
         });
     }
 
-    // Returns true if the character successfully jumped on the enemy
     handleJumpOnEnemy(enemy) {
         if (this.character.isColliding(enemy) && this.character.isAboveGround() && this.character.speedY < 0) {
-            console.log("Collision with:", enemy.constructor.name);
             enemy.hit();
             this.character.speedY = 15;
             return true;
@@ -273,7 +241,6 @@ class World {
         if (this.character.isColliding(enemy) && !this.isJumpingOnEnemy()) {
             this.character.hit();
             this.healthBar.setPercentage(this.character.energy);
-            console.log("Character hit! Energy:", this.character.energy);
             this.checkCharacterDeath();
         }
     }
@@ -299,7 +266,6 @@ class World {
     checkBossShouldMove() {
         if (this.character.x >= 3595) {
             this.boss.animate();
-            console.log('Boss is moving now!');
         }
     }
 
@@ -432,4 +398,3 @@ class World {
         this.level.bottles.splice(index, 1);
     }
 }
-// sounds

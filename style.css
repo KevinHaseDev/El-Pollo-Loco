@@ -1,4 +1,3 @@
-/* Global reset for fullscreen without scrollbars */
 * {
     margin: 0;
     padding: 0;
@@ -8,8 +7,8 @@
 html, body {
     width: 100%;
     height: 100%;
-    overflow: hidden; /* keine Scrollbars */
-    position: fixed; /* verhindert Bounce-Effekte auf Mobile */
+    overflow: hidden;
+    position: fixed;
 }
 
 body {
@@ -35,31 +34,27 @@ canvas {
     background-color: black;
 }
 
-/* Responsive canvas: keep internal drawing buffer 720x480, scale visually */
-/* Game area wrapper so start-screen can exactly overlay the canvas */
 .game_area {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    width: auto; /* wieder ursprüngliches Verhalten: nicht viewport-gefüllt */
+    width: auto;
     height: auto;
     max-width: 100%;
     max-height: 100%;
 }
 
 #canvas {
-    /* ursprüngliche feste interne Auflösung: 720x480 (skaliert responsiv) */
     width: 720px;
     height: 480px;
-    max-width: 95vw;   /* skaliere auf kleinen Bildschirmen */
+    max-width: 95vw;
     max-height: 90vh;
     display: block;
     box-shadow: 0 8px 20px rgba(0,0,0,0.4);
 }
 
-/* Start screen image sizing - will cover the canvas exactly inside the wrapper */
 .start_screen img {
     width: 100%;
     height: 100%;
@@ -68,9 +63,7 @@ canvas {
     z-index: 0;
 }
 
-/* Shared button styling for start/retry */
 .game_button {
-
     position: absolute;
     bottom: 25%;
     margin-top: 16px;
@@ -87,7 +80,6 @@ canvas {
     z-index: 2000;
 }
 
-/* Endscreen action buttons are hidden until win/lose overlay is shown */
 .endscreen_actions {
     display: none;
     position: absolute;
@@ -218,7 +210,6 @@ canvas {
     color: #8b4513;
 }
 
-/* Start screen overlay: positioned over the canvas within .game-area */
 .start_screen {
     position: absolute;
     inset: 0;
@@ -233,7 +224,6 @@ canvas {
     display: none;
 }
 
-/* Mobile Controls */
 .mobile_controls {
     display: none;
     position: fixed;
@@ -243,14 +233,13 @@ canvas {
     width: 100%;
     max-width: 900px;
     margin: 0 auto;
-    padding: 0 18px; /* reduced horizontal padding to avoid cutoff */
+    padding: 0 18px;
     justify-content: space-between;
     align-items: flex-end;
     z-index: 500;
     pointer-events: none;
 }
 
-/* Show mobile controls on touch devices and small screens after game starts */
 @media (hover: none) and (pointer: coarse), (max-width: 768px) {
     .mobile_controls.active {
         display: flex;
@@ -285,20 +274,17 @@ canvas {
     background: rgba(198, 102, 47, 1);
 }
 
-/* shift the right group slightly left so throw button is not cut off */
 .mobile_controls_right.shift-left {
     transform: translateX(-36px);
     transition: transform 0.15s ease;
 }
 
-/* stronger shift on smaller screens */
 @media (max-width: 600px) {
     .mobile_controls_right.shift-left {
         transform: translateX(-52px);
     }
 }
 
-/* Responsive adjustments for smaller screens */
 @media (max-width: 600px) {
     .game_area {
         width: 95vw;
@@ -365,11 +351,8 @@ canvas {
     }
 }
 
-/* ============================================
-   PORTRAIT MODE OVERLAY
-   ============================================ */
 .portrait_overlay {
-    display: none; /* standardmäßig versteckt */
+    display: none;
     position: fixed;
     inset: 0;
     width: 100vw;
@@ -384,13 +367,21 @@ canvas {
     padding: 20px;
 }
 
+.portrait_overlay.visible {
+    display: flex;
+}
+
+.game_area.hidden_by_orientation {
+    display: none;
+}
+
 .portrait_content {
     max-width: 90%;
 }
 
 .rotate_icon {
     font-size: 80px;
-    margin-bottom: 50px; /* etwas mehr Abstand zur Überschrift/Text */
+    margin-bottom: 50px;
     animation: rotate-pulse 2s ease-in-out infinite;
 }
 
@@ -411,41 +402,40 @@ canvas {
     opacity: 0.9;
 }
 
-/* Zeige Portrait Overlay nur im Hochformat bis inkl. 1024px Breite */
-@media (orientation: portrait) and (max-width: 1024px) {
-    .portrait_overlay {
-        display: flex;
-    }
-    
-    .game_area {
-        display: none;
-    }
+body.mobile_landscape_fullscreen .game_area {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
 }
 
-/* Landscape: Spiel wird fullscreen angezeigt */
-@media (orientation: landscape) {
-    .portrait_overlay {
-        display: none;
-    }
-    
-    .game_area {
-        display: flex;
-    }
-    
-    /* Mobile Buttons im Landscape optimieren */
-    .mobile_controls {
-        bottom: 10px;
-        padding: 0 15px;
-    }
-    
-    .mobile_btn {
-        width: 55px;
-        height: 55px;
-        font-size: 20px;
-    }
+body.mobile_landscape_fullscreen #canvas {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
 }
 
-/* Sehr kleine Landscape-Displays */
+body.mobile_landscape_fullscreen .canvas_info_buttons {
+    width: calc(100vw - 24px);
+    max-width: 1280px;
+    bottom: 12px;
+}
+
+body.mobile_landscape_fullscreen .mobile_controls {
+    bottom: 10px;
+    padding: 0 12px;
+}
+
+body.mobile_landscape_fullscreen .mobile_btn {
+    width: 55px;
+    height: 55px;
+    font-size: 20px;
+}
+
 @media (orientation: landscape) and (max-height: 450px) {
     .mobile_btn {
         width: 45px;
@@ -463,3 +453,4 @@ canvas {
         gap: 8px;
     }
 }
+

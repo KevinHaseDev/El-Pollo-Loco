@@ -2,19 +2,12 @@ let canvas;
 let world;
 let keyboard = new Keyboard();
 
-/**
- * Initialisiert einmalig die statischen UI-Bestandteile des Spiels.
- */
 function init() {
     canvas = document.getElementById('canvas');
     setupEndscreenButtons();
     setupMobileControls();
 }
 
-/**
- * Startet ein neues Level ohne Seiten-Reload.
- * Diese Funktion wird sowohl vom Start- als auch vom Restart-Button verwendet.
- */
 function startLevel() {
     stopRunningWorld();
 
@@ -33,9 +26,7 @@ function startLevel() {
     showMobileControls();
 }
 
-/**
- * Beendet die aktuelle World sauber, damit keine alten Loops weiterlaufen.
- */
+
 function stopRunningWorld() {
     if (world && typeof world.dispose === 'function') {
         world.dispose();
@@ -43,9 +34,6 @@ function stopRunningWorld() {
     world = null;
 }
 
-/**
- * Setzt alle Eingaben zurück, damit kein gedrückter Zustand erhalten bleibt.
- */
 function resetKeyboardState() {
     keyboard.left = false;
     keyboard.right = false;
@@ -54,9 +42,6 @@ function resetKeyboardState() {
     keyboard.space = false;
 }
 
-/**
- * Kehrt ohne Reload zur Startansicht zurück.
- */
 function returnToStartView() {
     stopRunningWorld();
     resetKeyboardState();
@@ -71,9 +56,6 @@ function returnToStartView() {
     }
 }
 
-/**
- * Zeigt die mobilen Steuerknöpfe an, nachdem das Spiel gestartet wurde.
- */
 function showMobileControls() {
     let mobileControls = document.getElementById('mobile-controls');
     if (mobileControls) {
@@ -81,9 +63,6 @@ function showMobileControls() {
     }
 }
 
-/**
- * Versteckt die mobilen Steuerknöpfe z. B. in der Startansicht.
- */
 function hideMobileControls() {
     let mobileControls = document.getElementById('mobile-controls');
     if (mobileControls) {
@@ -91,20 +70,12 @@ function hideMobileControls() {
     }
 }
 
-/**
- * Richtet den Orientation-Change-Listener ein, um Portrait-Overlay zu steuern.
- * Wird beim DOMContentLoaded ausgeführt.
- */
 function setupOrientationHandler() {
     checkOrientation();
     window.addEventListener('orientationchange', checkOrientation);
     window.addEventListener('resize', checkOrientation);
 }
 
-/**
- * Prüft die aktuelle Orientierung und zeigt/versteckt das Portrait-Overlay.
- * Das Overlay wird nur auf kleinen Geräten im Portrait-Modus angezeigt.
- */
 function checkOrientation() {
     let overlay = document.getElementById('portrait-overlay');
     if (!overlay) return;
@@ -119,9 +90,6 @@ function checkOrientation() {
     }
 }
 
-/**
- * Richtet die Endscreen-Aktionen fuer Retry und Home ein.
- */
 function setupEndscreenButtons() {
     let retryBtn = document.getElementById('retry-button');
     let homeBtn = document.getElementById('home-button');
@@ -139,9 +107,6 @@ function setupEndscreenButtons() {
     }
 }
 
-/**
- * Blendet den Endscreen-Aktionsbereich aus.
- */
 function hideEndscreenActions() {
     let actionContainer = document.getElementById('endscreen-actions');
     if (actionContainer) {
@@ -150,10 +115,6 @@ function hideEndscreenActions() {
     }
 }
 
-/**
- * Verschiebt die rechte Gruppe der mobilen Buttons nach links, damit der Werfen-Button
- * nicht abgeschnitten wird. Fügt die CSS-Klasse 'shift-left' zur Gruppe hinzu.
- */
 function applyRightGroupShift() {
     let rightGroup = document.querySelector('.mobile_controls_right');
     if (rightGroup && !rightGroup.classList.contains('shift-left')) {
@@ -161,23 +122,14 @@ function applyRightGroupShift() {
     }
 }
 
-/**
- * Richtet die mobilen Steuerknöpfe ein und verschiebt bei Bedarf die rechte Gruppe.
- */
 function setupMobileControls() {
     setupMobileButton('btn-left', 'left');
     setupMobileButton('btn-right', 'right');
     setupMobileButton('btn-jump', 'up');
     setupMobileButton('btn-throw', 'space');
-
-    // Verschiebe die rechte Button-Gruppe etwas nach links, damit nichts abgeschnitten wird
     applyRightGroupShift();
 }
 
-/**
- * Richtet die Buttons fuer Impressum und Spielbeschreibung ein.
- * Die Overlays koennen ueber Buttons geoeffnet und wieder geschlossen werden.
- */
 function setupInformationButtons() {
     let imprintButton = document.getElementById('imprint-button');
     let descriptionButton = document.getElementById('description-button');
@@ -212,9 +164,6 @@ function setupInformationButtons() {
     }
 }
 
-/**
- * Oeffnet ein Overlay anhand seiner ID und schliesst vorher ggf. andere Overlays.
- */
 function openInfoOverlay(overlayId) {
     closeAllInfoOverlays();
     let overlay = document.getElementById(overlayId);
@@ -224,9 +173,6 @@ function openInfoOverlay(overlayId) {
     }
 }
 
-/**
- * Schliesst ein Overlay anhand seiner ID.
- */
 function closeInfoOverlay(overlayId) {
     let overlay = document.getElementById(overlayId);
     if (overlay) {
@@ -235,9 +181,6 @@ function closeInfoOverlay(overlayId) {
     }
 }
 
-/**
- * Schliesst alle vorhandenen Info-Overlays.
- */
 function closeAllInfoOverlays() {
     let overlays = document.querySelectorAll('.info_overlay');
     for (let index = 0; index < overlays.length; index++) {
@@ -246,9 +189,6 @@ function closeAllInfoOverlays() {
     }
 }
 
-/**
- * Blendet die Info-Buttons auf dem Canvas aus.
- */
 function hideCanvasInfoButtons() {
     let infoButtons = document.getElementById('canvas-info-buttons');
     if (infoButtons) {
@@ -256,9 +196,6 @@ function hideCanvasInfoButtons() {
     }
 }
 
-/**
- * Blendet die Info-Buttons auf dem Canvas ein.
- */
 function showCanvasInfoButtons() {
     let infoButtons = document.getElementById('canvas-info-buttons');
     if (infoButtons) {
@@ -266,16 +203,10 @@ function showCanvasInfoButtons() {
     }
 }
 
-/**
- * Prueft, ob Eingaben aktuell gesperrt sind (z. B. nach Game-Over).
- */
 function isInputLocked() {
     return !!(world && world.frozen);
 }
 
-/**
- * Richtet die Eingabelogik fuer einen mobilen Steuerungsbutton ein.
- */
 function setupMobileButton(buttonId, keyboardKey) {
     let btn = document.getElementById(buttonId);
     if (btn) {
@@ -300,11 +231,8 @@ function setupMobileButton(buttonId, keyboardKey) {
     }
 }
 
-// Start button: show the game only when user clicks Start
 document.addEventListener('DOMContentLoaded', () => {
     init();
-
-    // Setup orientation handler
     setupOrientationHandler();
     setupInformationButtons();
     
