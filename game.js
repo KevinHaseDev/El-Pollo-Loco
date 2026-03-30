@@ -361,13 +361,8 @@ function bindSoundButton() {
             const pressed = btn.getAttribute('aria-pressed') === 'true';
             muted = !pressed;
         }
-        if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(muted);
-        else {
-            btn.setAttribute('aria-pressed', muted ? 'true' : 'false');
-            btn.innerHTML = '<img src="' + (
-                muted ? 'assets/icon/volume_off.svg' : 'assets/icon/volume_up.svg'
-            ) + '" alt="' + (muted ? 'Muted' : 'Unmuted') + '">';
-        }
+        // Unmute via button should restore full volume; pass forceMax = true
+        applyMuteState(muted, true);
     });
 }
 
@@ -427,17 +422,35 @@ function bindDocumentCloseHandlers() {
  * Apply mute/unmute to hub and button UI.
  * @param {boolean} muted True to mute, false to unmute.
  */
-function applyMuteState(muted) {
+function applyMuteState(muted, forceMax) {
     const btn = document.getElementById('sound');
+    const slider = document.getElementById('audio-slider');
     if (muted) {
         if (window.sound && window.sound.hub && typeof window.sound.hub.mute === 'function') window.sound.hub.mute();
         else if (window.audioHub && typeof window.audioHub.mute === 'function') window.audioHub.mute();
+        // reflect in slider
+        if (slider) slider.value = 0;
         if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(true);
         else if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.innerHTML = '<img src="assets/icon/volume_off.svg" alt="Muted">'; }
         return;
     }
+    // unmute: make hub active
     if (window.sound && window.sound.hub && typeof window.sound.hub.unmute === 'function') window.sound.hub.unmute();
     else if (window.audioHub && typeof window.audioHub.unmute === 'function') window.audioHub.unmute();
+
+    if (forceMax) {
+        // unmuted via button -> set to max
+        if (window.sound && typeof window.sound.setMasterVolume === 'function') window.sound.setMasterVolume(1);
+        else if (window.sound && window.sound.hub && typeof window.sound.hub.setMasterVolume === 'function') window.sound.hub.setMasterVolume(1);
+        else if (window.audioHub && typeof window.audioHub.setMasterVolume === 'function') window.audioHub.setMasterVolume(1);
+        if (slider) slider.value = 1;
+    } else {
+        // unmuted via slider -> keep current masterVolume
+        const current = (window.sound && window.sound.hub && typeof window.sound.hub.masterVolume !== 'undefined') ? window.sound.hub.masterVolume :
+            (window.audioHub && typeof window.audioHub.masterVolume !== 'undefined' ? window.audioHub.masterVolume : 1);
+        if (slider) slider.value = current || 1;
+    }
+
     if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(false);
     else if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">'; }
 }
