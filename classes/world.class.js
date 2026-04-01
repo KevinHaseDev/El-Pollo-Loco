@@ -164,7 +164,14 @@ class World {
         bottle.world = this;
         this.throwableObject.push(bottle);
         this.canThrow = false;
-        this.character.bottleAmount -= 20;
+        if (this.character) {
+            this.character.bottleAmount -= 20;
+            this.character.isThrowing = true;
+            this.character.idleStartTime = new Date().getTime();
+            setTimeout(() => {
+                if (this.character) this.character.isThrowing = false;
+            }, this.character.throwAnimationDuration || 400);
+        }
         this.collectedBottles = Math.max(0, this.collectedBottles - 1);
         this.updateBottleBarProgress();
     }
@@ -300,7 +307,7 @@ class World {
 
     /** Starts boss animation once player reaches endboss area. */
     checkBossShouldMove() {
-        if (this.character.x >= 3595) {
+        if (this.character.x >= 3595 || this.boss.isHurt()) {
             this.boss.animate();
         }
     }

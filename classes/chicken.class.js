@@ -20,6 +20,12 @@ class Chicken extends MovableObject {
         top: 5,
         bottom: 10
     }
+    death_offset = {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0
+    };
     deadtimer = 0;
 
     /**
@@ -47,12 +53,7 @@ class Chicken extends MovableObject {
                 this.playAnimation(this.images_walking);
                 this.getRealFrame();
             } else {
-                this.offset = {
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    bottom: 0
-                };
+                this.offset = this.death_offset;
                 this.getRealFrame();
                 this.deadtimer++;
                 this.playAnimation([this.images_dead[0]]);

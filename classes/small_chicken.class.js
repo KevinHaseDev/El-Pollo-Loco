@@ -18,6 +18,12 @@ class SmallChicken extends MovableObject {
         top: 15,
         bottom: 5
     }
+    death_offset = {
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0
+    };
     deadtimer = 0;
 
     /**
@@ -45,6 +51,7 @@ class SmallChicken extends MovableObject {
                 this.playAnimation(this.images_walking);
                 this.getRealFrame();
             } else {
+                this.offset = this.death_offset;
                 this.deadtimer++;
                 this.playAnimation([this.images_dead[0]]);
             }

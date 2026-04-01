@@ -75,6 +75,8 @@ class Character extends MovableObject {
     deadtimer = 0;
     coinAmount = 0;
     bottleAmount = 0;
+    isThrowing = false;
+    throwAnimationDuration = 400;
 
     /**
      * Creates the playable character and preloads all animation assets.
@@ -194,6 +196,10 @@ class Character extends MovableObject {
     updateAnimationState() {
         let idleDuration = (new Date().getTime() - this.idleStartTime) / 1000;
         if (this.playPriorityAnimation()) return;
+        if (this.isThrowing) {
+            this.playAnimation(this.images_walking);
+            return;
+        }
         this.selectAnimation(idleDuration);
     }
 

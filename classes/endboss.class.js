@@ -48,6 +48,11 @@ class Endboss extends MovableObject {
     lastWalkFrame = 0;
     hurtFrameInterval = 200;
     lastHurtFrame = 0;
+    idleFrameInterval = 100;
+    lastIdleFrame = 0;
+    deathFrameInterval = 400;
+    deathSequenceDuration = 4000;
+    deathStartTime = 0;
     world = null;
 
     /**
@@ -63,6 +68,7 @@ class Endboss extends MovableObject {
         this.loadImages(this.images_hit);
         this.endbossBar = new EndbossBar(this.x + 100, this.y - 10);
         this.speed = 1.5;
+        this.handleEndbossBehavior();
     }
 
     /**
@@ -70,7 +76,6 @@ class Endboss extends MovableObject {
      */
     animate() {
         this.handleEndbossMovement();
-        this.handleEndbossBehavior();
     }
 
     /**
@@ -90,7 +95,7 @@ class Endboss extends MovableObject {
         if (this.isDead()) return;
         let now = new Date().getTime();
         if (this.isHurt()) {
-            this.runHurtMovement(now);
+            this.playHurtFrame(now);
         } else {
             this.runRegularMovement(now);
         }
@@ -104,14 +109,6 @@ class Endboss extends MovableObject {
     runRegularMovement(now) {
         this.followCharacter();
         this.playWalkFrame(now);
-    }
-
-    /**
-     * Executes hurt animation movement.
-     * @param {number} now Current timestamp in milliseconds.
-     */
-    runHurtMovement(now) {
-        this.playHurtFrame(now);
     }
 
     /**
@@ -141,25 +138,25 @@ class Endboss extends MovableObject {
         setInterval(() => {
             if (this.world && this.world.frozen) return;
             this.getRealFrame();
-            this.executeBehaviorState();
-        }, 100);
+            let now = new Date().getTime();
+            this.executeBehaviorState(now);
+        }, 250);
     }
 
     /**
      * Executes the current behavior state.
      */
-    executeBehaviorState() {
-        if (this.isHurt()) return this.performHurtBehaviorEndboss();
-        if (this.isDead()) return this.performDeathBehaviorEndboss();
-        if (this.energy < 30) return this.performAttackEndboss();
-        this.performAlertEndboss();
+    executeBehaviorState(now) {
+        if (this.isHurt()) return this.performHurtBehaviorEndboss(now);
+        if (this.isDead()) return this.performDeathBehaviorEndboss(now);
+        if (this.energy < 30) return this.performAttackEndboss(now);
+        this.performAlertEndboss(now);
     }
 
     /**
      * Applies knockback and bar updates while hurt.
      */
-    performHurtBehaviorEndboss() {
-        let now = new Date().getTime();
+    performHurtBehaviorEndboss(now) {
         let elapsed = now - this.lastHit;
         this.activateHurtState(now);
         this.applyHurtKnockback(elapsed);
@@ -201,18 +198,19 @@ class Endboss extends MovableObject {
     /**
      * Executes death sequence behavior.
      */
-    performDeathBehaviorEndboss() {
-        this.startDeathSequence();
-        this.updateDeathAnimation();
+    performDeathBehaviorEndboss(now) {
+        this.startDeathSequence(now);
+        this.updateDeathAnimation(now);
     }
 
     /**
      * Initializes death sequence once.
      */
-    startDeathSequence() {
+    startDeathSequence(now) {
         if (this.deathStarted) return;
         this.deathStarted = true;
         this.deadtimer = 0;
+        this.deathStartTime = now || new Date().getTime();
         this.speedY = 18;
         this.endbossBar.setVisibility(false);
     }
@@ -220,20 +218,23 @@ class Endboss extends MovableObject {
     /**
      * Advances death animation and final death flag.
      */
-    updateDeathAnimation() {
-        this.deadtimer++;
-        if (this.deadtimer % 4 === 0) {
-            this.playAnimation(this.images_dead);
-        }
-        if (this.deadtimer > 40) {
+    updateDeathAnimation(now) {
+        if (!this.deathStartTime) this.deathStartTime = now || new Date().getTime();
+        let elapsed = (now || new Date().getTime()) - this.deathStartTime;
+        if (elapsed > this.deathSequenceDuration) {
             this.dead = true;
+            return;
         }
+        let frameIndex = Math.floor(elapsed / this.deathFrameInterval);
+        let frame = frameIndex % this.images_dead.length;
+        let path = this.images_dead[frame];
+        this.img = this.imageCache[path];
     }
 
     /**
      * Executes attack-phase movement.
      */
-    performAttackEndboss() {
+    performAttackEndboss(now) {
         this.followCharacter();
         this.updateEndbossBar();
     }
@@ -241,8 +242,12 @@ class Endboss extends MovableObject {
     /**
      * Executes alert animation state.
      */
-    performAlertEndboss() {
-        this.playAnimation(this.images_idle);
+    performAlertEndboss(now) {
+        if (!this.lastIdleFrame) this.lastIdleFrame = now;
+        while (now - this.lastIdleFrame >= this.idleFrameInterval) {
+            this.playAnimation(this.images_idle);
+            this.lastIdleFrame += this.idleFrameInterval;
+        }
     }
 
     /**
