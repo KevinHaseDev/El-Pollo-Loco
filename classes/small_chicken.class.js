@@ -7,7 +7,9 @@ class SmallChicken extends MovableObject {
         './assets/img/3_enemies_chicken/chicken_small/1_walk/2_w.png',
         './assets/img/3_enemies_chicken/chicken_small/1_walk/3_w.png'
     ];
-    images_dead = ['./assets/img/3_enemies_chicken/chicken_small/2_dead/dead.png'];
+    images_dead = [
+        './assets/img/3_enemies_chicken/chicken_small/2_dead/dead.png'
+    ];
     realX;
     realY;
     realWidth;
