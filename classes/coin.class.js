@@ -9,7 +9,7 @@ class Coins extends MovableObject {
   offset = {
     top: 5,
     bottom: 5,
-    left: 5,
+    left: 10,
     right: 5
   };
   images_coins = [

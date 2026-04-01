@@ -35,7 +35,7 @@ class Endboss extends MovableObject {
     realWidth;
     realHeight;
     offset = {
-        left: 10,
+        left: 20,
         right: 10,
         top: 10,
         bottom: 10
@@ -252,7 +252,7 @@ class Endboss extends MovableObject {
         if (!this.world || !this.world.character) return;
         let characterX = this.world.character.x;
         let distanceToCharacter = characterX - this.x;
-        if (Math.abs(distanceToCharacter) > 50) {
+        if (Math.abs(distanceToCharacter) > 10) {
             if (distanceToCharacter < 0) {
                 this.moveLeft();
                 this.otherDirection = false;

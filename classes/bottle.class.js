@@ -11,10 +11,10 @@ class Bottles extends MovableObject {
   realWidth;
   realHeight;
   offset = {
-    top: 10,
-    bottom: 10,
+    top: 5,
+    bottom: 5,
     left: 10,
-    right: 10
+    right: 5
   };
 
   /**

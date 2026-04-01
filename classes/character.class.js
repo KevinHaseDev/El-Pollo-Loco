@@ -68,8 +68,8 @@ class Character extends MovableObject {
     offset = {
         top: 100,
         bottom: 0,
-        left: 30,
-        right: 30
+        left: 15,
+        right: 50
     };
     energy = 100;
     deadtimer = 0;
