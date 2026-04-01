@@ -274,6 +274,15 @@ class Endboss extends MovableObject {
     updateEndbossBar() {
         this.endbossBar.x = this.x + 100;
     }
+
+    /**
+     * Prueft, ob der Endboss seine aktive Bewegung starten soll.
+     * @param {number} characterX Aktuelle X-Position des Characters.
+     * @returns {boolean} True, wenn der Endboss starten soll.
+     */
+    shouldStartMoving(characterX) {
+        return characterX >= 3595 || this.isHurt();
+    }
 }
 
 

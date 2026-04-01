@@ -23,7 +23,7 @@ class EndbossBar extends StatusBar {
     this.visible = false;
     this.setPercentage(100);
   }
-
+ 
   /**
    * Toggles visibility and dimensions of the endboss health bar.
    * @param {boolean} isVisible Visibility flag.

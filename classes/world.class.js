@@ -40,26 +40,7 @@ class World {
     /** Assigns world reference to character and all entity groups. */
     setWorld() {
         this.character.world = this;
-        this.syncWorldReferences();
-    }
-
-    /** Assigns world reference to each object in the provided list. */
-    assignWorldReference(objectArray) {
-        if (!objectArray) {
-            return;
-        }
-        objectArray.forEach((gameObject) => {
-            gameObject.world = this;
-        });
-    }
-
-    /** Synchronizes world references for all active entity lists. */
-    syncWorldReferences() {
-        this.assignWorldReference(this.level.enemies);
-        this.assignWorldReference(this.level.clouds);
-        this.assignWorldReference(this.level.coins);
-        this.assignWorldReference(this.level.bottles);
-        this.assignWorldReference(this.throwableObject);
+        this.level.syncWorldReferences(this, this.throwableObject);
     }
 
     /** Initializes collectible progress counters and bars. */
@@ -95,7 +76,7 @@ class World {
     /** Starts main world update loops. */
     run() {
         this.updateInterval = setInterval(() => {
-            this.syncWorldReferences();
+            this.level.syncWorldReferences(this, this.throwableObject);
             this.checkCollisions();
             this.checkBottleCollisions();
             this.checkThrowObjects();
@@ -118,7 +99,7 @@ class World {
             this.bossInterval = null;
         }
         this.stopSpawnIntervals();
-        this.resetKeyboardInput();
+        this.keyboard.reset();
         this.frozen = true;
     }
 
@@ -134,15 +115,6 @@ class World {
         }
     }
 
-    /** Resets all keyboard inputs to false. */
-    resetKeyboardInput() {
-        this.keyboard.left = false;
-        this.keyboard.right = false;
-        this.keyboard.up = false;
-        this.keyboard.down = false;
-        this.keyboard.space = false;
-    }
-
     /** Handles bottle throwing input and cooldown state. */
     checkThrowObjects() {
         if (this.canThrowBottle()) {
@@ -155,7 +127,7 @@ class World {
 
     /** Returns true when a bottle can be thrown. */
     canThrowBottle() {
-        return this.character.bottleAmount > 0 && this.keyboard.space && this.canThrow;
+        return this.character.canThrowBottle(this.keyboard.space, this.canThrow);
     }
 
     /** Creates and launches one throwable bottle object. */
@@ -164,14 +136,8 @@ class World {
         bottle.world = this;
         this.throwableObject.push(bottle);
         this.canThrow = false;
-        if (this.character) {
-            this.character.bottleAmount -= 20;
-            this.character.isThrowing = true;
-            this.character.idleStartTime = new Date().getTime();
-            setTimeout(() => {
-                if (this.character) this.character.isThrowing = false;
-            }, this.character.throwAnimationDuration || 400);
-        }
+        this.character.bottleAmount -= 20;
+        this.character.startThrowAnimation();
         this.collectedBottles = Math.max(0, this.collectedBottles - 1);
         this.updateBottleBarProgress();
     }
@@ -181,7 +147,7 @@ class World {
         this.throwableObject.forEach((bottle) => {
             this.level.enemies.forEach((enemy) => {
                 this.handleBottleEnemyCollision(bottle, enemy);
-                this.cleanupDeadEnemy(enemy);
+                this.level.removeEnemyByDeadtimer(enemy, 20);
                 this.checkBossDefeat();
             });
         });
@@ -192,13 +158,6 @@ class World {
         if (bottle.isColliding(enemy)) {
             enemy.hit();
             this.throwableObject = this.throwableObject.filter(b => b !== bottle);
-        }
-    }
-
-    /** Removes an enemy from level list after death timer threshold. */
-    cleanupDeadEnemy(enemy) {
-        if (enemy.deadtimer > 20) {
-            this.level.enemies = this.level.enemies.filter(e => e !== enemy);
         }
     }
 
@@ -255,7 +214,7 @@ class World {
             if (!didJumpOn) {
                 this.handleCharacterHitByEnemy(enemy);
             }
-            this.removeDeadEnemy(enemy);
+            this.level.removeEnemyByDeadtimer(enemy, 10);
         });
     }
 
@@ -298,16 +257,9 @@ class World {
         }
     }
 
-    /** Removes enemy after death animation timer threshold. */
-    removeDeadEnemy(enemy) {
-        if (enemy.deadtimer > 10) {
-            this.level.enemies = this.level.enemies.filter(e => e !== enemy);
-        }
-    }
-
     /** Starts boss animation once player reaches endboss area. */
     checkBossShouldMove() {
-        if (this.character.x >= 3595 || this.boss.isHurt()) {
+        if (this.boss.shouldStartMoving(this.character.x)) {
             this.boss.animate();
         }
     }
@@ -429,14 +381,9 @@ class World {
                 this.character.collectCoin();
                 this.collectedCoins++;
                 this.updateCoinBarProgress();
-                this.removeCoin(index);
+                this.level.removeCoin(index);
             }
         });
-    }
-
-    /** Removes one collected coin by array index. */
-    removeCoin(index) {
-        this.level.coins.splice(index, 1);
     }
 
     /** Checks bottle pickups and updates collection progress. */
@@ -446,13 +393,8 @@ class World {
                 this.character.collectBottle();
                 this.collectedBottles++;
                 this.updateBottleBarProgress();
-                this.removeBottle(index);
+                this.level.removeBottle(index);
             }
         });
-    }
-
-    /** Removes one collected bottle by array index. */
-    removeBottle(index) {
-        this.level.bottles.splice(index, 1);
     }
 }

@@ -263,4 +263,25 @@ class Character extends MovableObject {
     collectBottle() {
         this.bottleAmount += 20;
     }
+
+    /**
+     * Prueft, ob eine Flasche geworfen werden darf.
+     * @param {boolean} isSpacePressed Aktueller Space-Status.
+     * @param {boolean} canThrow Globaler Wurf-Cooldown-Status.
+     * @returns {boolean} True, wenn geworfen werden darf.
+     */
+    canThrowBottle(isSpacePressed, canThrow) {
+        return this.bottleAmount > 0 && isSpacePressed && canThrow;
+    }
+
+    /**
+     * Startet die kurze aktive Wurf-Animation.
+     */
+    startThrowAnimation() {
+        this.isThrowing = true;
+        this.idleStartTime = new Date().getTime();
+        setTimeout(() => {
+            this.isThrowing = false;
+        }, this.throwAnimationDuration || 400);
+    }
 }
