@@ -32,7 +32,7 @@ class World {
         this.initializeCollectionProgress();
         this.setWorld();
         this.winImage.src = "assets/img/You won, you lost/You Won B.png";
-        this.loseImage.src = "assets/img/You won, you lost/You lost.png";
+        this.loseImage.src = "assets/img/You won, you lost/You lost b.png";
         this.draw();
         this.run();
     }
