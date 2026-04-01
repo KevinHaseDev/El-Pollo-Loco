@@ -477,13 +477,13 @@ window.addEventListener('keydown', (event) => {
         return;
     }
 
-    if (event.key == 39 || event.key === 'd')
+    if (event.key == 39 || event.key === 'd' || event.key === 'ArrowRight')
         keyboard.right = true;
-    if (event.key == 37 || event.key === 'a')
+    if (event.key == 37 || event.key === 'a' || event.key === 'ArrowLeft')
         keyboard.left = true;
-    if (event.key == 38 || event.key === 'w')
+    if (event.key == 38 || event.key === 'w' || event.key === 'ArrowUp')
         keyboard.up = true;
-    if (event.key == 40 || event.key === 's')
+    if (event.key == 40 || event.key === 's' || event.key === 'ArrowDown')
         keyboard.down = true;
     if (event.key == 32 || event.key === ' ')
         keyboard.space = true;
@@ -492,13 +492,13 @@ window.addEventListener('keydown', (event) => {
 });
 
 window.addEventListener('keyup', (event) => {
-    if (event.key == 39 || event.key === 'd')
+    if (event.key == 39 || event.key === 'd' || event.key === 'ArrowRight')
         keyboard.right = false;
-    if (event.key == 37 || event.key === 'a')
+    if (event.key == 37 || event.key === 'a' || event.key === 'ArrowLeft')
         keyboard.left = false;
-    if (event.key == 38 || event.key === 'w')
+    if (event.key == 38 || event.key === 'w' || event.key === 'ArrowUp')
         keyboard.up = false;
-    if (event.key == 40 || event.key === 's')
+    if (event.key == 40 || event.key === 's' || event.key === 'ArrowDown')
         keyboard.down = false;
     if (event.key == 32 || event.key === ' ')
         keyboard.space = false;
