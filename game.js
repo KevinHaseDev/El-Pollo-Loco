@@ -16,22 +16,17 @@ function init() {
  */
 function startLevel() {
     stopRunningWorld();
-
     if (typeof startLevelOne === 'function') {
         startLevelOne();
     }
-
     resetKeyboardState();
     hideEndscreenActions();
-
     if (!canvas) {
         canvas = document.getElementById('canvas');
     }
-
     world = new World(canvas, keyboard);
     showMobileControls();
 }
-
 
 /**
  * Disposes the active world instance.
