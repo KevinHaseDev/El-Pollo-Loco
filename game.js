@@ -149,6 +149,17 @@ function hideEndscreenActions() {
 }
 
 /**
+ * Zeigt Endscreen-Action-Buttons an und aktualisiert den aria-Status.
+ */
+function showEndscreenActions() {
+    let actionContainer = document.getElementById('endscreen-actions');
+    if (actionContainer) {
+        actionContainer.classList.add('visible');
+        actionContainer.setAttribute('aria-hidden', 'false');
+    }
+}
+
+/**
  * Moves the right mobile control group slightly left.
  */
 function applyRightGroupShift() {

@@ -275,6 +275,39 @@ class Character extends MovableObject {
     }
 
     /**
+     * Berechnet den naechsten Wurfstatus aus Input und Cooldown.
+     * @param {boolean} isSpacePressed Aktueller Space-Status.
+     * @param {boolean} canThrow Aktueller Cooldown-Status.
+     * @returns {{shouldThrow: boolean, canThrow: boolean}} Neuer Wurfstatus.
+     */
+    resolveThrowState(isSpacePressed, canThrow) {
+        if (this.canThrowBottle(isSpacePressed, canThrow)) {
+            return {
+                shouldThrow: true,
+                canThrow: false
+            };
+        }
+        if (!isSpacePressed) {
+            return {
+                shouldThrow: false,
+                canThrow: true
+            };
+        }
+        return {
+            shouldThrow: false,
+            canThrow
+        };
+    }
+
+    /**
+     * Erstellt ein neues Wurfobjekt an der Character-Position.
+     * @returns {ThrowableObject} Das erzeugte Wurfobjekt.
+     */
+    createThrowableBottle() {
+        return new ThrowableObject(this.x + 100, this.y + 100);
+    }
+
+    /**
      * Startet die kurze aktive Wurf-Animation.
      */
     startThrowAnimation() {
@@ -283,5 +316,54 @@ class Character extends MovableObject {
         setTimeout(() => {
             this.isThrowing = false;
         }, this.throwAnimationDuration || 400);
+    }
+
+    /**
+     * Prueft, ob der Character gerade von oben auf Gegner springt.
+     * @returns {boolean} True, wenn der Character im Sprung nach unten ist.
+     */
+    isJumpingOnEnemy() {
+        return this.isAboveGround() && this.speedY < 0;
+    }
+
+    /**
+     * Versucht einen Sprungtreffer auf einen Gegner auszufuehren.
+     * @param {MovableObject} enemy Gegnerinstanz.
+     * @returns {boolean} True, wenn ein Sprungtreffer passiert ist.
+     */
+    tryJumpOnEnemy(enemy) {
+        if (enemy.isDead()) {
+            return false;
+        }
+        if (this.isColliding(enemy) && this.isJumpingOnEnemy()) {
+            enemy.hit();
+            this.speedY = 15;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Verarbeitet direkten Gegnerkontakt ohne Sprungtreffer.
+     * @param {MovableObject} enemy Gegnerinstanz.
+     * @returns {boolean} True, wenn Schaden am Character entstanden ist.
+     */
+    handleEnemyContact(enemy) {
+        if (enemy.isDead()) {
+            return false;
+        }
+        if (this.isColliding(enemy) && !this.isJumpingOnEnemy()) {
+            this.hit();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Prueft, ob der Character den Lose-Zustand ausloesen soll.
+     * @returns {boolean} True, wenn der Character besiegt ist.
+     */
+    shouldTriggerLoseState() {
+        return this.isDead();
     }
 }

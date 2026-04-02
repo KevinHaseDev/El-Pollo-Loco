@@ -33,4 +33,27 @@ class StatusBar extends DrawableObject {
         if (this.percentage >= 20) return 1;
         return 0;
     }
+
+    /**
+     * Berechnet den Sammel-Fortschritt in Prozent.
+     * @param {number} collectedAmount Aktuell gesammelte Anzahl.
+     * @param {number} totalAmount Gesamtanzahl im Level.
+     * @returns {number} Prozentwert zwischen 0 und 100.
+     */
+    calculateCollectionPercentage(collectedAmount, totalAmount) {
+        if (totalAmount === 0) {
+            return 100;
+        }
+        return Math.min(100, (collectedAmount / totalAmount) * 100);
+    }
+
+    /**
+     * Setzt den Balkenwert aus gesammelt/gesamt.
+     * @param {number} collectedAmount Aktuell gesammelte Anzahl.
+     * @param {number} totalAmount Gesamtanzahl im Level.
+     */
+    setCollectionProgress(collectedAmount, totalAmount) {
+        let percentage = this.calculateCollectionPercentage(collectedAmount, totalAmount);
+        this.setPercentage(percentage);
+    }
 }

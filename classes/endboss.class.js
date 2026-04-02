@@ -283,6 +283,14 @@ class Endboss extends MovableObject {
     shouldStartMoving(characterX) {
         return characterX >= 3595 || this.isHurt();
     }
+
+    /**
+     * Prueft, ob der Endboss den Win-Zustand ausloesen soll.
+     * @returns {boolean} True, wenn der Endboss besiegt ist.
+     */
+    shouldTriggerWinState() {
+        return this.isDead();
+    }
 }
 
 
