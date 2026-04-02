@@ -189,25 +189,42 @@ function setupInformationButtons() {
     let closeButtons = document.querySelectorAll('.info_close_button');
     let overlays = document.querySelectorAll('.info_overlay');
 
-    if (imprintButton) {
-        imprintButton.onclick = () => {
-            openInfoOverlay('imprint-overlay');
-        };
-    }
+    bindInfoOpenButton(imprintButton, 'imprint-overlay');
+    bindInfoOpenButton(descriptionButton, 'description-overlay');
+    bindInfoCloseButtons(closeButtons);
+    bindInfoBackdropClose(overlays);
+}
 
-    if (descriptionButton) {
-        descriptionButton.onclick = () => {
-            openInfoOverlay('description-overlay');
-        };
-    }
+/**
+ * Bindet einen Button zum Oeffnen eines Info-Overlays.
+ * @param {HTMLElement | null} button Button-Element.
+ * @param {string} overlayId Ziel-Overlay-ID.
+ */
+function bindInfoOpenButton(button, overlayId) {
+    if (!button) return;
+    button.onclick = () => {
+        openInfoOverlay(overlayId);
+    };
+}
 
+/**
+ * Bindet alle Close-Buttons der Info-Overlays.
+ * @param {NodeListOf<HTMLElement>} closeButtons Liste der Close-Buttons.
+ */
+function bindInfoCloseButtons(closeButtons) {
     for (let index = 0; index < closeButtons.length; index++) {
         closeButtons[index].onclick = () => {
             let overlayId = closeButtons[index].getAttribute('data-close-overlay');
             closeInfoOverlay(overlayId);
         };
     }
+}
 
+/**
+ * Bindet Overlay-Hintergrundklick zum Schliessen.
+ * @param {NodeListOf<HTMLElement>} overlays Liste der Overlay-Elemente.
+ */
+function bindInfoBackdropClose(overlays) {
     for (let index = 0; index < overlays.length; index++) {
         overlays[index].onclick = (event) => {
             if (event.target === overlays[index]) {
@@ -288,35 +305,57 @@ function isInputLocked() {
  */
 function setupMobileButton(buttonId, keyboardKey) {
     let btn = document.getElementById(buttonId);
-    if (btn) {
-        btn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (isInputLocked()) return;
-            keyboard[keyboardKey] = true;
-        });
-        btn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keyboard[keyboardKey] = false;
-        });
-        btn.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            if (isInputLocked()) return;
-            keyboard[keyboardKey] = true;
-        });
-        btn.addEventListener('mouseup', (e) => {
-            e.preventDefault();
-            keyboard[keyboardKey] = false;
-        });
-    }
+    if (!btn) return;
+    bindMobilePressControl(btn, keyboardKey, 'touchstart', 'touchend');
+    bindMobilePressControl(btn, keyboardKey, 'mousedown', 'mouseup');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Bindet Press/Release-Events auf einen Mobile-Button.
+ * @param {HTMLElement} btn Ziel-Button.
+ * @param {string} keyboardKey Keyboard-State-Key.
+ * @param {string} pressEvent Press-Eventname.
+ * @param {string} releaseEvent Release-Eventname.
+ */
+function bindMobilePressControl(btn, keyboardKey, pressEvent, releaseEvent) {
+    btn.addEventListener(pressEvent, (event) => {
+        event.preventDefault();
+        if (isInputLocked()) return;
+        setKeyboardKeyState(keyboardKey, true);
+    });
+    btn.addEventListener(releaseEvent, (event) => {
+        event.preventDefault();
+        setKeyboardKeyState(keyboardKey, false);
+    });
+}
+
+/**
+ * Setzt den Wert eines Keyboard-Keys.
+ * @param {string} keyboardKey Keyboard-State-Key.
+ * @param {boolean} value Zielwert.
+ */
+function setKeyboardKeyState(keyboardKey, value) {
+    keyboard[keyboardKey] = value;
+}
+
+document.addEventListener('DOMContentLoaded', onDomContentLoaded);
+
+/**
+ * Fuehrt Initialisierung nach DOM-Ladevorgang aus.
+ */
+function onDomContentLoaded() {
     init();
     setupOrientationHandler();
     setupInformationButtons();
     initSoundUI();
 
+    bindStartButton();
+}
 
+/**
+ * Bindet den Start-Button-Handler.
+ */
+function bindStartButton() {
     let startBtn = document.getElementById('start-button');
     let startScreen = document.getElementById('start-screen');
     if (startBtn && startScreen) {
@@ -327,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startLevel();
         };
     }
-});
+}
 
 /**
  * Initialize sound UI bindings and state.
@@ -434,36 +473,112 @@ function bindDocumentCloseHandlers() {
  * @param {boolean} muted True to mute, false to unmute.
  */
 function applyMuteState(muted, forceMax) {
-    const btn = document.getElementById('sound');
-    const slider = document.getElementById('audio-slider');
+    let btn = document.getElementById('sound');
+    let slider = document.getElementById('audio-slider');
     if (muted) {
-        if (window.sound && window.sound.hub && typeof window.sound.hub.mute === 'function') window.sound.hub.mute();
-        else if (window.audioHub && typeof window.audioHub.mute === 'function') window.audioHub.mute();
-        // reflect in slider
-        if (slider) slider.value = 0;
-        if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(true);
-        else if (btn) { btn.setAttribute('aria-pressed', 'true'); btn.innerHTML = '<img src="assets/icon/volume_off.svg" alt="Muted">'; }
+        applyMutedState(btn, slider);
         return;
     }
-    // unmute: make hub active
-    if (window.sound && window.sound.hub && typeof window.sound.hub.unmute === 'function') window.sound.hub.unmute();
-    else if (window.audioHub && typeof window.audioHub.unmute === 'function') window.audioHub.unmute();
+    applyUnmutedState(btn, slider, forceMax);
+}
 
-    if (forceMax) {
-        // unmuted via button -> set to max
-        if (window.sound && typeof window.sound.setMasterVolume === 'function') window.sound.setMasterVolume(1);
-        else if (window.sound && window.sound.hub && typeof window.sound.hub.setMasterVolume === 'function') window.sound.hub.setMasterVolume(1);
-        else if (window.audioHub && typeof window.audioHub.setMasterVolume === 'function') window.audioHub.setMasterVolume(1);
-        if (slider) slider.value = 1;
-    } else {
-        // unmuted via slider -> keep current masterVolume
-        const current = (window.sound && window.sound.hub && typeof window.sound.hub.masterVolume !== 'undefined') ? window.sound.hub.masterVolume :
-            (window.audioHub && typeof window.audioHub.masterVolume !== 'undefined' ? window.audioHub.masterVolume : 1);
-        if (slider) slider.value = current || 1;
+/**
+ * Wendet den Mute-Zustand auf Hub, Slider und Button an.
+ * @param {HTMLElement | null} btn Sound-Button.
+ * @param {HTMLInputElement | null} slider Lautstaerke-Slider.
+ */
+function applyMutedState(btn, slider) {
+    muteAudioHub();
+    if (slider) slider.value = 0;
+    if (window.sound && typeof window.sound.updateButtonUI === 'function') {
+        window.sound.updateButtonUI(true);
+        return;
     }
+    updateMutedButtonFallback(btn);
+}
 
-    if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(false);
-    else if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">'; }
+/**
+ * Wendet den Unmute-Zustand auf Hub, Slider und Button an.
+ * @param {HTMLElement | null} btn Sound-Button.
+ * @param {HTMLInputElement | null} slider Lautstaerke-Slider.
+ * @param {boolean} forceMax True wenn direkt auf max gesetzt werden soll.
+ */
+function applyUnmutedState(btn, slider, forceMax) {
+    unmuteAudioHub();
+    if (forceMax) {
+        setMasterVolumeToMax(slider);
+    } else {
+        syncSliderWithCurrentVolume(slider);
+    }
+    if (window.sound && typeof window.sound.updateButtonUI === 'function') {
+        window.sound.updateButtonUI(false);
+        return;
+    }
+    updateUnmutedButtonFallback(btn);
+}
+
+/**
+ * Mute über verfügbaren Audio-Hub.
+ */
+function muteAudioHub() {
+    if (window.sound && window.sound.hub && typeof window.sound.hub.mute === 'function') {
+        window.sound.hub.mute();
+        return;
+    }
+    if (window.audioHub && typeof window.audioHub.mute === 'function') window.audioHub.mute();
+}
+
+/**
+ * Unmute über verfügbaren Audio-Hub.
+ */
+function unmuteAudioHub() {
+    if (window.sound && window.sound.hub && typeof window.sound.hub.unmute === 'function') {
+        window.sound.hub.unmute();
+        return;
+    }
+    if (window.audioHub && typeof window.audioHub.unmute === 'function') window.audioHub.unmute();
+}
+
+/**
+ * Setzt Master-Volume auf Maximum und synchronisiert den Slider.
+ * @param {HTMLInputElement | null} slider Lautstaerke-Slider.
+ */
+function setMasterVolumeToMax(slider) {
+    if (window.sound && typeof window.sound.setMasterVolume === 'function') window.sound.setMasterVolume(1);
+    else if (window.sound && window.sound.hub && typeof window.sound.hub.setMasterVolume === 'function') window.sound.hub.setMasterVolume(1);
+    else if (window.audioHub && typeof window.audioHub.setMasterVolume === 'function') window.audioHub.setMasterVolume(1);
+    if (slider) slider.value = 1;
+}
+
+/**
+ * Synchronisiert den Slider mit der aktuellen Master-Lautstaerke.
+ * @param {HTMLInputElement | null} slider Lautstaerke-Slider.
+ */
+function syncSliderWithCurrentVolume(slider) {
+    let current = (window.sound && window.sound.hub && typeof window.sound.hub.masterVolume !== 'undefined')
+        ? window.sound.hub.masterVolume
+        : (window.audioHub && typeof window.audioHub.masterVolume !== 'undefined' ? window.audioHub.masterVolume : 1);
+    if (slider) slider.value = current || 1;
+}
+
+/**
+ * Fallback-UI fuer gemuteten Button-Zustand.
+ * @param {HTMLElement | null} btn Sound-Button.
+ */
+function updateMutedButtonFallback(btn) {
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', 'true');
+    btn.innerHTML = '<img src="assets/icon/volume_off.svg" alt="Muted">';
+}
+
+/**
+ * Fallback-UI fuer ungemuteten Button-Zustand.
+ * @param {HTMLElement | null} btn Sound-Button.
+ */
+function updateUnmutedButtonFallback(btn) {
+    if (!btn) return;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">';
 }
 
 /**
