@@ -178,6 +178,7 @@ class Character extends MovableObject {
     triggerJumpAction() {
         this.jump();
         this.idleStartTime = new Date().getTime();
+        this.playGameSound('playCharacterJump');
     }
 
     /**
@@ -195,12 +196,17 @@ class Character extends MovableObject {
      */
     updateAnimationState() {
         let idleDuration = (new Date().getTime() - this.idleStartTime) / 1000;
-        if (this.playPriorityAnimation()) return;
+        if (this.playPriorityAnimation()) {
+            this.syncMovementAudio(idleDuration);
+            return;
+        }
         if (this.isThrowing) {
             this.playAnimation(this.images_walking);
+            this.syncMovementAudio(idleDuration);
             return;
         }
         this.selectAnimation(idleDuration);
+        this.syncMovementAudio(idleDuration);
     }
 
     /**
@@ -236,6 +242,21 @@ class Character extends MovableObject {
         }
     }
 
+    syncMovementAudio(idleDuration) {
+        if (!window.gameSound) return;
+        let isMoving = this.world && (this.world.keyboard.right || this.world.keyboard.left);
+        let isRunning = !!isMoving && !this.isAboveGround() && !this.isDead() && !this.isHurt();
+        let isSnoring = idleDuration > 5 && !isMoving && !this.isAboveGround() && !this.isDead() && !this.isHurt();
+        window.gameSound.syncCharacterMovement(isRunning, isSnoring);
+    }
+
+    playGameSound(methodName) {
+        if (!window.gameSound) return;
+        if (typeof window.gameSound[methodName] === 'function') {
+            window.gameSound[methodName]();
+        }
+    }
+
     /**
      * Plays the hurt animation sequence.
      */
@@ -255,6 +276,7 @@ class Character extends MovableObject {
      */
     collectCoin() {
         this.coinAmount += 20;
+        this.playGameSound('playCollectCoin');
     }
 
     /**
@@ -262,6 +284,7 @@ class Character extends MovableObject {
      */
     collectBottle() {
         this.bottleAmount += 20;
+        this.playGameSound('playCollectBottle');
     }
 
     /**
@@ -313,6 +336,7 @@ class Character extends MovableObject {
     startThrowAnimation() {
         this.isThrowing = true;
         this.idleStartTime = new Date().getTime();
+        this.playGameSound('playCharacterThrow');
         setTimeout(() => {
             this.isThrowing = false;
         }, this.throwAnimationDuration || 400);
@@ -338,6 +362,7 @@ class Character extends MovableObject {
         if (this.isColliding(enemy) && this.isJumpingOnEnemy()) {
             enemy.hit();
             this.speedY = 15;
+            this.playGameSound('playChickenHurt');
             return true;
         }
         return false;
@@ -353,7 +378,11 @@ class Character extends MovableObject {
             return false;
         }
         if (this.isColliding(enemy) && !this.isJumpingOnEnemy()) {
+            let previousEnergy = this.energy;
             this.hit();
+            if (this.energy < previousEnergy) {
+                this.playGameSound('playCharacterHurt');
+            }
             return true;
         }
         return false;

@@ -147,8 +147,16 @@ class Endboss extends MovableObject {
      * Executes the current behavior state.
      */
     executeBehaviorState(now) {
-        if (this.isHurt()) return this.performHurtBehaviorEndboss(now);
-        if (this.isDead()) return this.performDeathBehaviorEndboss(now);
+        if (this.isHurt()) {
+            this.syncEndbossIdleSound(false);
+            return this.performHurtBehaviorEndboss(now);
+        }
+        if (this.isDead()) {
+            this.syncEndbossIdleSound(false);
+            return this.performDeathBehaviorEndboss(now);
+        }
+        let shouldPlayIdle = this.world && this.world.character && this.shouldStartMoving(this.world.character.x);
+        this.syncEndbossIdleSound(!!shouldPlayIdle);
         if (this.energy < 30) return this.performAttackEndboss(now);
         this.performAlertEndboss(now);
     }
@@ -213,6 +221,21 @@ class Endboss extends MovableObject {
         this.deathStartTime = now || new Date().getTime();
         this.speedY = 18;
         this.endbossBar.setVisibility(false);
+        this.syncEndbossIdleSound(false);
+        if (window.gameSound && typeof window.gameSound.playEndbossDead === 'function') {
+            window.gameSound.playEndbossDead();
+        }
+    }
+
+    /**
+     * Steuert den Endboss-Idle-Sound zentral ueber die Sound-Bridge.
+     * @param {boolean} isActive True wenn Idle-Sound laufen soll.
+     */
+    syncEndbossIdleSound(isActive) {
+        if (!window.gameSound) return;
+        if (typeof window.gameSound.syncEndbossIdle === 'function') {
+            window.gameSound.syncEndbossIdle(isActive);
+        }
     }
 
     /**

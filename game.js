@@ -25,6 +25,7 @@ function startLevel() {
         canvas = document.getElementById('canvas');
     }
     world = new World(canvas, keyboard);
+    activateGameplaySound();
     showMobileControls();
 }
 
@@ -64,6 +65,7 @@ function returnToStartView() {
     if (startScreen) {
         startScreen.classList.remove('hidden');
     }
+    activateStartscreenSound();
 }
 
 /**
@@ -343,8 +345,29 @@ function onDomContentLoaded() {
     setupOrientationHandler();
     setupInformationButtons();
     initSoundUI();
+    activateStartscreenSound();
 
     bindStartButton();
+}
+
+/**
+ * Aktiviert den Startscreen-Soundmodus.
+ */
+function activateStartscreenSound() {
+    if (!window.gameSound) return;
+    if (typeof window.gameSound.toStartscreen === 'function') {
+        window.gameSound.toStartscreen();
+    }
+}
+
+/**
+ * Aktiviert den Ingame-Soundmodus.
+ */
+function activateGameplaySound() {
+    if (!window.gameSound) return;
+    if (typeof window.gameSound.toIngame === 'function') {
+        window.gameSound.toIngame();
+    }
 }
 
 /**

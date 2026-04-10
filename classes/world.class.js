@@ -23,6 +23,7 @@ class World {
     overlayAlpha = 0;
     animationFrameId = null;
     isActive = true;
+    lastAudioSync = 0;
 
     /** Creates a playable world bound to one canvas and keyboard instance. */
     constructor(canvas, keyboard) {
@@ -62,6 +63,7 @@ class World {
             this.checkThrowObjects();
             this.checkCollisionCoin();
             this.checkCollisionBottle();
+            this.syncAmbientEnemyAudio();
         }, 1000 / 60);
         this.bossInterval = setInterval(() => {
             this.checkBossShouldMove();
@@ -81,6 +83,9 @@ class World {
         this.stopSpawnIntervals();
         this.keyboard.reset();
         this.frozen = true;
+        if (window.gameSound && typeof window.gameSound.stopGameplayLoops === 'function') {
+            window.gameSound.stopGameplayLoops();
+        }
     }
 
     /** Stops globally registered spawn intervals if available. */
@@ -127,9 +132,25 @@ class World {
     triggerGameEnd(type) {
         this.overlayType = type;
         this.gameOver = true;
+        this.playEndSound(type);
         this.freezeGame();
         if (typeof showEndscreenActions === 'function') {
             showEndscreenActions();
+        }
+    }
+
+    /**
+     * Spielt den passenden Endsound fuer Win oder Lose.
+     * @param {'win' | 'lose'} type Endzustand.
+     */
+    playEndSound(type) {
+        if (!window.gameSound) return;
+        if (type === 'win' && typeof window.gameSound.onWin === 'function') {
+            window.gameSound.onWin();
+            return;
+        }
+        if (type === 'lose' && typeof window.gameSound.onLose === 'function') {
+            window.gameSound.onLose();
         }
     }
 
@@ -143,6 +164,25 @@ class World {
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
             this.animationFrameId = null;
+        }
+    }
+
+    /**
+     * Synchronisiert Lauf-Ambience der Gegner in festen Abstaenden.
+     */
+    syncAmbientEnemyAudio() {
+        if (!window.gameSound) return;
+        let now = Date.now();
+        if (now - this.lastAudioSync < 250) return;
+        this.lastAudioSync = now;
+        let hasChicken = this.level.enemies.some((enemy) => {
+            return typeof Chicken !== 'undefined' && enemy instanceof Chicken && !enemy.isDead();
+        });
+        let hasSmallChicken = this.level.enemies.some((enemy) => {
+            return typeof SmallChicken !== 'undefined' && enemy instanceof SmallChicken && !enemy.isDead();
+        });
+        if (typeof window.gameSound.syncEnemyAmbience === 'function') {
+            window.gameSound.syncEnemyAmbience(hasChicken, hasSmallChicken);
         }
     }
 

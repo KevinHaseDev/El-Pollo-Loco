@@ -156,7 +156,9 @@ class Level {
         let updatedThrowableObject = throwableObject;
         this.forEachBottleEnemyPair(updatedThrowableObject, (bottle, enemy) => {
             if (bottle.isColliding(enemy)) {
+                let previousEnergy = enemy.energy;
                 enemy.hit();
+                this.playBottleHitSound(enemy, previousEnergy);
                 updatedThrowableObject = updatedThrowableObject.filter(b => b !== bottle);
             }
             this.removeEnemyByDeadtimer(enemy, 20);
@@ -165,6 +167,22 @@ class Level {
             }
         });
         return updatedThrowableObject;
+    }
+
+    /**
+     * Spielt Treffer-Sounds fuer Flaschenkollisionen.
+     * @param {MovableObject} enemy Getroffenes Ziel.
+     * @param {number} previousEnergy Energie vor dem Treffer.
+     */
+    playBottleHitSound(enemy, previousEnergy) {
+        if (!window.gameSound) return;
+        if (enemy.energy >= previousEnergy) return;
+        window.gameSound.playBottleBreak();
+        if (typeof Endboss !== 'undefined' && enemy instanceof Endboss) {
+            window.gameSound.playEndbossHurt();
+            return;
+        }
+        window.gameSound.playChickenHurt();
     }
 
     /**
