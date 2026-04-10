@@ -99,12 +99,20 @@ class AudioHub {
         let item = this.sounds.get(name);
         if (!item) return;
         item.audio.volume = this.muted ? 0 : this.masterVolume * item.baseVolume;
-        let playPromise = item.audio.play();
-        if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(() => {
-                if (name === 'startscreenMusic') this.tryStartscreenMutedAutoplay(item);
-            });
+        if (name === 'startscreenMusic' && !this.startscreenAutoplayBootDone) {
+            this.tryStartscreenMutedAutoplay(item);
+            return;
         }
+        this.playSoundWithFallback(name, item);
+    }
+
+    /** Plays one sound and retries startscreen with muted bootstrap on failure. */
+    playSoundWithFallback(name, soundItem) {
+        let playPromise = soundItem.audio.play();
+        if (!playPromise || typeof playPromise.catch !== 'function') return;
+        playPromise.catch(() => {
+            if (name === 'startscreenMusic') this.tryStartscreenMutedAutoplay(soundItem);
+        });
     }
 
     /** Tries muted autoplay bootstrap for startscreen music. */
