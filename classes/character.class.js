@@ -41,7 +41,6 @@ class Character extends MovableObject {
         './assets/img/2_character_pepe/3_jump/J-37.png',
         './assets/img/2_character_pepe/3_jump/J-38.png',
         './assets/img/2_character_pepe/3_jump/J-39.png',
-
     ];
     images_hurt = [
         './assets/img/2_character_pepe/4_hurt/H-41.png',
@@ -342,12 +341,16 @@ class Character extends MovableObject {
         }, this.throwAnimationDuration || 400);
     }
 
-    /**
-     * Prueft, ob der Character gerade von oben auf Gegner springt.
-     * @returns {boolean} True, wenn der Character im Sprung nach unten ist.
-     */
-    isJumpingOnEnemy() {
-        return this.isAboveGround() && this.speedY < 0;
+    /** Prueft Stomp-Bedingung von oben auf einen Gegner. */
+    isJumpingOnEnemy(enemy) {
+        if (!enemy) return false;
+        if (typeof enemy.realY !== 'number' || typeof enemy.realHeight !== 'number') return false;
+        let characterBottom = this.realY + this.realHeight;
+        let enemyStompLimit = enemy.realY + enemy.realHeight * 0.9;
+        let isFalling = this.speedY <= 2;
+        let isRecentBounce = Date.now() - (this.lastStompAt || 0) < 220;
+        let isOnTopHalf = characterBottom <= enemyStompLimit || this.realY <= enemy.realY + enemy.realHeight * 0.6;
+        return this.isAboveGround() && (isFalling || isRecentBounce) && isOnTopHalf;
     }
 
     /**
@@ -359,8 +362,9 @@ class Character extends MovableObject {
         if (enemy.isDead()) {
             return false;
         }
-        if (this.isColliding(enemy) && this.isJumpingOnEnemy()) {
+        if (this.isColliding(enemy) && this.isJumpingOnEnemy(enemy)) {
             enemy.hit();
+            this.lastStompAt = Date.now();
             this.speedY = 15;
             this.playGameSound('playChickenHurt');
             return true;
@@ -377,7 +381,7 @@ class Character extends MovableObject {
         if (enemy.isDead()) {
             return false;
         }
-        if (this.isColliding(enemy) && !this.isJumpingOnEnemy()) {
+        if (this.isColliding(enemy) && !this.isJumpingOnEnemy(enemy)) {
             let previousEnergy = this.energy;
             this.hit();
             if (this.energy < previousEnergy) {
