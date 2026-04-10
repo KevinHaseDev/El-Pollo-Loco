@@ -1,67 +1,75 @@
-## JavaScript Rules
+## Allgemeine JavaScript Regeln
 
-- Use clear and meaningful English names for functions and variables.
-- Use let instead of const in this project.
+- Write javascript function names in english and with clear meaning.
+- Write javascript variable names in english and with clear meaning.
+- Use innerHTML instead of eventlistener.
+- Use let instead of const.
 - Never use var.
-- Use template literals instead of string concatenation.
 - Never use inline styles.
-- Use semantic HTML tags.
+- Use template literals instead of string concatenation.
 - Use flexbox instead of grid.
-- Prefer innerHTML-based rendering for UI updates.
-- Use async/await instead of .then().
-- Keep functions small and focused on one responsibility.
-- Keep regular functions at a maximum of 14 lines (HTML template blocks excluded).
-- Start function and variable names with a lowercase letter.
-- Keep 1 or 2 empty lines between functions.
-- Keep files below 400 LOC when possible.
-- Document functions with JSDoc in English: https://jsdoc.app/about-getting-started.html
+- Use semantic html tags.
+- Follow clean code principles (clear naming, small functions).
+- Always use async/await for asynchronous code instead of .then().
+- Document every function in German.
 
-## Functionality
+## Funktionalitaet
 
-- All links and buttons must work.
-- There must be no console errors.
-- Do not leave console.log statements in final code.
-- Status bars must update correctly.
-- Collision logic must be accurate (enemies must not die when the player only jumps beside them).
-- The character must be unable to move after death.
-- After game over, restarting must be possible without reloading the page.
+- Alle Links und Buttons muessen funktionstuechtig sein.
+- Es darf keine Konsolenfehler geben.
+- Es darf keine console.log-Ausgaben im finalen Code geben.
 
 ## Design
 
-- Build the design creatively while staying consistent with the project style.
-- Use a suitable local font.
-- A favicon must be included.
-- All buttons must use cursor: pointer.
-- Avoid visible gaps between background images.
-- Keep animation timing balanced (not too fast, not too slow).
+- Setze das Design bestmoeglich um und arbeite kreativ innerhalb des Projektstils.
+- Waehle eine passende Schriftart und binde sie lokal ein.
+- Ein Favicon muss vorhanden sein.
+- Buttons muessen cursor: pointer; gesetzt haben.
 
 ## Responsiveness
 
-- The game must work fully on desktop devices.
-- On mobile devices, gameplay is landscape-only.
-- In portrait mode, show a clear hint such as: Turn your device to play.
-- Mobile touch buttons must only be visible on tablet and phone breakpoints.
-- Touch buttons must work correctly on tablets.
-- No scrollbar should appear on small resolutions.
+- Die Seite funktioniert auf Desktop-Geraeten vollstaendig.
+- In der mobilen Ansicht darf das Spiel nur im Querformat nutzbar sein.
+- Im Hochformat muss ein klarer Hinweis angezeigt werden, z. B. Turn your Device to play.
+- Mobile Touch-Buttons sind erst auf Tablet-/Handy-Groessen sichtbar.
+- Bei kleinen Aufloesungen darf kein Scrollbalken entstehen.
 
-## Technical Implementation
+## Technische Umsetzung
 
-- File names must be descriptive, meaningful, and consistent.
-- The main page file must be named index.html.
-- Keep JavaScript classes in the separate classes folder.
-- Keep the project structure clean with separate templates and img folders.
-- Use the existing core file names consistently: index.html, game.js, style.css.
-- Do not generate all static HTML through JavaScript.
-- If needed, split HTML output into clearly separated functions.
+- Dateinamen muessen beschreibend, aussagekraeftig und konsistent sein.
+- Die Hauptseite muss index.html heissen.
+- JavaScript-Klassen liegen in einem separaten classes-Ordner.
+- Projektstruktur bleibt sauber mit separaten Ordnern fuer templates und img.
+- Dateien muessen korrekt benannt sein: index.html, script.js, style.css.
+- Statischer HTML-Code wird nicht ueber JavaScript generiert.
+- HTML-Code ggf. in klar getrennte Funktionen auslagern.
 
-## Gameplay and Audio Quality
+## JavaScript und Clean Code
 
-- Enemy count must stay balanced.
-- Enemy strength must stay balanced.
-- Sounds must start and stop cleanly.
-- The mute button must mute all sounds.
-- Audio volumes must remain moderate.
+- Eine Funktion hat nur eine Aufgabe.
+- Eine Funktion ist maximal 14 Zeilen lang (HTML ausgenommen).
+- Der erste Buchstabe von Funktionen und Variablen ist klein.
+- Datei-, Funktions- und Variablennamen sind deutlich und konsistent.
+- Zwischen Funktionen sind 1 oder 2 Leerzeilen Abstand einzuhalten.
+- Eine Datei darf maximal 400 LOC enthalten.
+- Funktionen sind nach JSDoc-Standard in englisch dokumentiert: https://jsdoc.app/about-getting-started.html
 
-## Legal
+## Vermeide haeufige Fehler
 
-- Do not use real personal data in the imprint.
+- Animationen duerfen nicht zu schnell oder zu langsam abgespielt werden.
+- Es darf keine sichtbaren Luecken zwischen Hintergrundbildern geben.
+- Gegneranzahl muss ausgewogen sein (nicht zu wenige, nicht zu viele).
+- Gegnerstaerke muss ausgewogen sein (nicht zu stark, nicht zu schwach).
+- Gegner duerfen nicht sterben, wenn man nur neben sie springt.
+- Statusbars muessen korrekt aktualisiert werden.
+- Der Charakter muss nach Ableben unbeweglich sein.
+- Sounds muessen sauber gestartet und gestoppt werden.
+- Der Mute-Button muss alle Sounds stummschalten.
+- Lautstaerken duerfen nicht zu hoch sein.
+- Nach Game Over muss ein Neustart moeglich sein.
+- Restart darf nicht ueber Seiten-Reload geloest sein.
+
+## Mobile und Rechtliches
+
+- Buttons muessen auch auf Tablets korrekt funktionieren.
+- Im Impressum duerfen keine echten persoenlichen Daten verwendet werden.

@@ -1,9 +1,9 @@
 /**
- * Central audio manager for the game.
+ * Verwaltet alle Audios zentral fuer das Spiel.
  */
 class AudioHub {
     /**
-     * Creates the audio container with default values.
+     * Erstellt den Audio-Container mit Standardwerten.
      */
     constructor() {
         this.sounds = new Map();
@@ -12,11 +12,11 @@ class AudioHub {
         this.playingMaster = false;
     }
     /**
-     * Registers one sound in the hub.
-     * @param {string} name Internal sound key.
-     * @param {string} url File path.
-     * @param {{loop?: boolean, volume?: number}} options Audio options.
-     * @returns {HTMLAudioElement} Registered audio element.
+     * Registriert einen Sound einmalig im Hub.
+     * @param {string} name Interner Soundname.
+     * @param {string} url Dateipfad.
+     * @param {{loop?: boolean, volume?: number}} options Audio-Optionen.
+     * @returns {HTMLAudioElement} Registriertes Audioelement.
      */
     registerSound(name, url, options = {}) {
         if (this.sounds.has(name)) return this.sounds.get(name).audio;
@@ -29,17 +29,17 @@ class AudioHub {
         return audio;
     }
     /**
-     * Returns whether a sound key exists.
-     * @param {string} name Internal sound key.
-     * @returns {boolean} True when present.
+     * Prueft, ob ein Sound existiert.
+     * @param {string} name Interner Soundname.
+     * @returns {boolean} True wenn vorhanden.
      */
     hasSound(name) {
         return this.sounds.has(name);
     }
     /**
-     * Returns whether a sound is currently playing.
-     * @param {string} name Internal sound key.
-     * @returns {boolean} True when audio is active.
+     * Prueft, ob ein Sound gerade laeuft.
+     * @param {string} name Interner Soundname.
+     * @returns {boolean} True wenn Audio aktiv ist.
      */
     isPlaying(name) {
         if (!this.sounds.has(name)) return false;
@@ -47,8 +47,8 @@ class AudioHub {
         return !item.audio.paused && !item.audio.ended;
     }
     /**
-     * Plays one registered sound.
-     * @param {string} name Internal sound key.
+     * Spielt einen registrierten Sound.
+     * @param {string} name Interner Soundname.
      */
     play(name) {
         let item = this.sounds.get(name);
@@ -58,8 +58,8 @@ class AudioHub {
         if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => { });
     }
     /**
-     * Pauses one sound.
-     * @param {string} name Internal sound key.
+     * Pausiert einen Sound.
+     * @param {string} name Interner Soundname.
      */
     pause(name) {
         let item = this.sounds.get(name);
@@ -67,8 +67,8 @@ class AudioHub {
         item.audio.pause();
     }
     /**
-     * Stops one sound and rewinds it.
-     * @param {string} name Internal sound key.
+     * Stoppt einen Sound und setzt ihn zurueck.
+     * @param {string} name Interner Soundname.
      */
     stop(name) {
         let item = this.sounds.get(name);
@@ -77,7 +77,7 @@ class AudioHub {
         item.audio.currentTime = 0;
     }
     /**
-     * Plays all sounds registered as loops.
+     * Spielt alle als Loop registrierten Sounds.
      */
     playAllLooping() {
         for (let [name, soundItem] of this.sounds) {
@@ -86,7 +86,7 @@ class AudioHub {
         this.playingMaster = true;
     }
     /**
-     * Stops all registered sounds.
+     * Stoppt alle registrierten Sounds.
      */
     stopAll() {
         for (let [, soundItem] of this.sounds) {
@@ -96,8 +96,8 @@ class AudioHub {
         this.playingMaster = false;
     }
     /**
-     * Sets global master volume.
-     * @param {number} value Target value between 0 and 1.
+     * Setzt die globale Lautstaerke.
+     * @param {number} value Zielwert zwischen 0 und 1.
      */
     setMasterVolume(value) {
         let volume = Math.max(0, Math.min(1, Number(value)));
@@ -107,7 +107,7 @@ class AudioHub {
         }
     }
     /**
-     * Mutes all sounds.
+     * Schaltet alle Sounds stumm.
      */
     mute() {
         this.muted = true;
@@ -116,7 +116,7 @@ class AudioHub {
         }
     }
     /**
-     * Unmutes all sounds.
+     * Hebt die Stummschaltung auf.
      */
     unmute() {
         this.muted = false;
@@ -125,8 +125,8 @@ class AudioHub {
         }
     }
     /**
-     * Toggles mute state.
-     * @returns {boolean} Current mute state.
+     * Schaltet zwischen Mute und Unmute um.
+     * @returns {boolean} Aktueller Mute-Status.
      */
     toggleMute() {
         if (this.muted) this.unmute();
@@ -134,8 +134,8 @@ class AudioHub {
         return this.muted;
     }
     /**
-     * Returns current mute state.
-     * @returns {boolean} True when muted.
+     * Liefert den Mute-Status.
+     * @returns {boolean} True wenn gemutet.
      */
     isMuted() {
         return this.muted;
@@ -143,6 +143,7 @@ class AudioHub {
 }
 window.audioHub = new AudioHub();
 let gameSoundsRegistered = false;
+let audioCacheBustToken = Date.now();
 let gameSoundDefinitions = [
     { name: 'startscreenMusic', file: 'audio_startscreen_sound.mp3', loop: true, volume: 0.38 },
     { name: 'ingameMusic', file: 'audio_ingame_sound.mp3', loop: true, volume: 0.35 },
@@ -164,17 +165,18 @@ let gameSoundDefinitions = [
     { name: 'win', file: 'audio_win.m4a', volume: 0.74 }
 ];
 /**
- * Registers all sounds from the mapping list.
+ * Registriert alle Sounds aus der Mapping-Liste.
  */
 function registerGameSounds() {
     for (let index = 0; index < gameSoundDefinitions.length; index++) {
         let definition = gameSoundDefinitions[index];
-        let soundPath = `./assets/audio/${definition.file}`;
+        let cacheBust = definition.name === 'bottleBreak' ? `?v=${audioCacheBustToken}` : '';
+        let soundPath = `./assets/audio/${definition.file}${cacheBust}`;
         window.audioHub.registerSound(definition.name, soundPath, { loop: !!definition.loop, volume: definition.volume });
     }
 }
 /**
- * Initializes sound registration exactly once.
+ * Initialisiert die Sound-Registrierung genau einmal.
  */
 function ensureGameSoundsRegistered() {
     if (gameSoundsRegistered) return;
@@ -182,10 +184,10 @@ function ensureGameSoundsRegistered() {
     gameSoundsRegistered = true;
 }
 /**
- * Starts or stops one loop sound.
- * @param {AudioHub} hub Audio instance.
- * @param {string} name Internal sound key.
- * @param {boolean} shouldPlay True starts, false stops.
+ * Startet oder stoppt einen Loop-Sound.
+ * @param {AudioHub} hub Audio-Instanz.
+ * @param {string} name Interner Soundname.
+ * @param {boolean} shouldPlay True startet, false stoppt.
  */
 function setLoopState(hub, name, shouldPlay) {
     if (!hub.hasSound(name)) return;
@@ -196,8 +198,8 @@ function setLoopState(hub, name, shouldPlay) {
     if (hub.isPlaying(name)) hub.stop(name);
 }
 /**
- * Stops all gameplay loop sounds.
- * @param {AudioHub} hub Audio instance.
+ * Stoppt alle Gameplay-Loop-Sounds.
+ * @param {AudioHub} hub Audio-Instanz.
  */
 function stopGameplayLoops(hub) {
     hub.stop('characterRunning');
@@ -207,9 +209,11 @@ function stopGameplayLoops(hub) {
     hub.stop('endbossIdle');
 }
 /**
- * Immediately restarts an effect sound.
- * @param {AudioHub} hub Audio instance.
- * @param {string} name Effect name.
+ * Spielt einen Effekt mit Cooldown und Sofort-Neustart bei Re-Trigger.
+ * @param {AudioHub} hub Audio-Instanz.
+ * @param {Object} timestamps Zeitstempel-Map.
+ * @param {string} name Effektname.
+ * @param {number} cooldownMs Mindestabstand in Millisekunden.
  */
 function restartEffectNow(hub, name) {
     hub.stop(name);
@@ -217,11 +221,11 @@ function restartEffectNow(hub, name) {
 }
 
 /**
- * Plays an effect with cooldown handling and immediate retrigger restart.
- * @param {AudioHub} hub Audio instance.
- * @param {Object} timestamps Timestamp map.
- * @param {string} name Effect name.
- * @param {number} cooldownMs Minimum delay in milliseconds.
+ * Spielt einen Effekt mit Offset und erzwingt bei Re-Trigger direkten Neustart.
+ * @param {AudioHub} hub Audio-Instanz.
+ * @param {Object} timestamps Zeitstempel-Map.
+ * @param {string} name Effektname.
+ * @param {number} cooldownMs Mindestabstand in Millisekunden.
  */
 function playEffectWithCooldown(hub, timestamps, name, cooldownMs) {
     ensureGameSoundsRegistered();
@@ -236,7 +240,7 @@ function playEffectWithCooldown(hub, timestamps, name, cooldownMs) {
     timestamps[name] = now;
     hub.play(name);
 }
-/** Activates startscreen music. */
+/** Aktiviert die Startscreen-Musik. */
 function playStartscreenMusic(hub) {
     ensureGameSoundsRegistered();
     stopGameplayLoops(hub);
@@ -246,7 +250,7 @@ function playStartscreenMusic(hub) {
     hub.play('startscreenMusic');
 }
 
-/** Activates in-game music mode. */
+/** Aktiviert den Ingame-Musikmodus. */
 function playIngameMusic(hub) {
     ensureGameSoundsRegistered();
     hub.stop('startscreenMusic');
@@ -255,7 +259,7 @@ function playIngameMusic(hub) {
     hub.play('ingameMusic');
 }
 
-/** Plays one end-state sound. */
+/** Spielt einen Endzustands-Sound. */
 function playEndStateSound(hub, soundName) {
     ensureGameSoundsRegistered();
     stopGameplayLoops(hub);
@@ -266,7 +270,7 @@ function playEndStateSound(hub, soundName) {
     hub.play(soundName);
 }
 
-/** Synchronizes character loop sounds. */
+/** Synchronisiert Character-Loop-Sounds. */
 function syncCharacterLoops(hub, isRunning, isSnoring) {
     ensureGameSoundsRegistered();
     if (isRunning) {
@@ -282,20 +286,20 @@ function syncCharacterLoops(hub, isRunning, isSnoring) {
     setLoopState(hub, 'characterRunning', false); setLoopState(hub, 'characterSnore', false);
 }
 
-/** Synchronizes enemy walking ambience. */
+/** Synchronisiert gegnerische Lauf-Ambience. */
 function syncEnemyLoops(hub, hasChicken, hasSmallChicken) {
     ensureGameSoundsRegistered();
     setLoopState(hub, 'chickenWalking', hasChicken);
     setLoopState(hub, 'smallChickenWalking', hasSmallChicken);
 }
 
-/** Synchronizes endboss idle loop. */
+/** Synchronisiert den Endboss-Idle-Loop. */
 function syncEndbossLoop(hub, isActive) {
     ensureGameSoundsRegistered();
     setLoopState(hub, 'endbossIdle', isActive);
 }
 
-/** Builds the core gameplay sound API bridge. */
+/** Baut den Kern der Gameplay-Sound-API. */
 function createCoreBridgeApi(hub) {
     return {
         ensureSetup: ensureGameSoundsRegistered,
@@ -310,7 +314,7 @@ function createCoreBridgeApi(hub) {
     };
 }
 
-/** Adds primary effect methods to the bridge. */
+/** Ergaenzt die haeufigen Effekt-Methoden. */
 function addPrimaryEffectApi(bridge, hub, effectTimestamps) {
     bridge.playCharacterJump = () => playEffectWithCooldown(hub, effectTimestamps, 'characterJump', 120);
     bridge.playCharacterHurt = () => playEffectWithCooldown(hub, effectTimestamps, 'characterHurt', 350);
@@ -319,7 +323,7 @@ function addPrimaryEffectApi(bridge, hub, effectTimestamps) {
     bridge.playCollectBottle = () => playEffectWithCooldown(hub, effectTimestamps, 'collectBottle', 110);
 }
 
-/** Adds secondary effect methods to the bridge. */
+/** Ergaenzt weitere Effekt-Methoden. */
 function addSecondaryEffectApi(bridge, hub, effectTimestamps) {
     bridge.playBottleBreak = () => playEffectWithCooldown(hub, effectTimestamps, 'bottleBreak', 120);
     bridge.playChickenHurt = () => playEffectWithCooldown(hub, effectTimestamps, 'chickenHurt', 140);
@@ -327,7 +331,7 @@ function addSecondaryEffectApi(bridge, hub, effectTimestamps) {
     bridge.playEndbossDead = () => playEffectWithCooldown(hub, effectTimestamps, 'endbossDead', 1200);
 }
 
-/** Builds the final bridge for gameplay sound methods. */
+/** Baut die finale Bridge fuer gameplay-bezogene Sounds. */
 function createGameSoundBridge(hub) {
     let effectTimestamps = {};
     let bridge = createCoreBridgeApi(hub);
@@ -336,8 +340,8 @@ function createGameSoundBridge(hub) {
     return bridge;
 }
 /**
- * Updates the sound icon in the button.
- * @param {boolean} muted True when muted.
+ * Aktualisiert das Sound-Icon im Button.
+ * @param {boolean} muted True bei Mute.
  */
 function updateSoundButtonIcon(muted) {
     let button = document.getElementById('sound');
@@ -350,15 +354,15 @@ function updateSoundButtonIcon(muted) {
     button.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">';
 }
 /**
- * Synchronizes slider value with master volume.
- * @param {AudioHub} hub Audio instance.
+ * Synchronisiert den Slider mit der Master-Lautstaerke.
+ * @param {AudioHub} hub Audio-Instanz.
  */
 function syncSliderValue(hub) {
     let slider = document.getElementById('audio-slider');
     if (!slider) return;
     slider.value = hub.masterVolume;
 }
-/** Builds the sound facade used by game.js. */
+/** Baut die bestehende Sound-API fuer game.js. */
 function createSoundFacade(hub) {
     return {
         hub,
@@ -370,7 +374,7 @@ function createSoundFacade(hub) {
     };
 }
 /**
- * Runs audio initialization after page load.
+ * Fuehrt die Audio-Initialisierung nach dem Laden aus.
  */
 function initializeAudioHubOnLoad() {
     ensureGameSoundsRegistered();

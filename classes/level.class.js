@@ -176,8 +176,8 @@ class Level {
      */
     playBottleHitSound(enemy, previousEnergy) {
         if (!window.gameSound) return;
-        if (enemy.energy >= previousEnergy) return;
         window.gameSound.playBottleBreak();
+        if (enemy.energy >= previousEnergy) return;
         if (typeof Endboss !== 'undefined' && enemy instanceof Endboss) {
             window.gameSound.playEndbossHurt();
             return;
