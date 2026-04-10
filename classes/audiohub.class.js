@@ -1,23 +1,76 @@
 /**
- * Verwaltet alle Audios zentral fuer das Spiel.
+ * Central audio manager for the game.
  */
 class AudioHub {
-    /**
-     * Erstellt den Audio-Container mit Standardwerten.
-     */
+    /** Initializes runtime state and API maps. */
     constructor() {
         this.sounds = new Map();
         this.masterVolume = 1;
         this.muted = false;
         this.playingMaster = false;
+
+        this.startscreenAutoplayBootInProgress = false;
+        this.startscreenAutoplayBootDone = false;
+
+        this.gameSoundsRegistered = false;
+        this.audioCacheBustToken = Date.now();
+        this.effectTimestamps = {};
+
+        this.gameSoundDefinitions = [
+            { name: 'startscreenMusic', file: 'audio_startscreen_sound.mp3', loop: true, volume: 0.38 },
+            { name: 'ingameMusic', file: 'audio_ingame_sound.mp3', loop: true, volume: 0.35 },
+            { name: 'characterJump', file: 'audio_character_jump.mp3', volume: 0.55 },
+            { name: 'characterRunning', file: 'audio_character_running.mp3', loop: true, volume: 0.28 },
+            { name: 'characterSnore', file: 'audio_character_snore.wav', loop: true, volume: 0.22 },
+            { name: 'characterHurt', file: 'audio_character_hurt.m4a', volume: 0.58 },
+            { name: 'characterThrow', file: 'audio_character_throw.m4a', volume: 0.55 },
+            { name: 'collectCoin', file: 'audio_collect_coin.m4a', volume: 0.56 },
+            { name: 'collectBottle', file: 'audio_collect_bottle.mp3', volume: 0.56 },
+            { name: 'bottleBreak', file: 'audio_bottle_breake.mp3', volume: 0.62 },
+            { name: 'chickenHurt', file: 'audio_chicken_hurt.mp3', volume: 0.58 },
+            { name: 'chickenWalking', file: 'audio_chicken_walking.mp3', loop: true, volume: 0.18 },
+            { name: 'smallChickenWalking', file: 'audio_small_chicken_walking.mp3', loop: true, volume: 0.17 },
+            { name: 'endbossIdle', file: 'audio_endboss_idle.wav', loop: true, volume: 0.2 },
+            { name: 'endbossHurt', file: 'audio_endboss_hurt.mp3', volume: 0.62 },
+            { name: 'endbossDead', file: 'audio_endboss_dead.wav', volume: 0.72 },
+            { name: 'gameOver', file: 'audio_game_over.mp3', volume: 0.72 },
+            { name: 'win', file: 'audio_win.m4a', volume: 0.74 }
+        ];
+
+        this.effectMethods = {
+            playCharacterJump: ['characterJump', 120],
+            playCharacterHurt: ['characterHurt', 350],
+            playCharacterThrow: ['characterThrow', 140],
+            playCollectCoin: ['collectCoin', 90],
+            playCollectBottle: ['collectBottle', 110],
+            playBottleBreak: ['bottleBreak', 120],
+            playChickenHurt: ['chickenHurt', 140],
+            playEndbossHurt: ['endbossHurt', 260],
+            playEndbossDead: ['endbossDead', 1200]
+        };
+
+        this.bindEffectMethods();
     }
-    /**
-     * Registriert einen Sound einmalig im Hub.
-     * @param {string} name Interner Soundname.
-     * @param {string} url Dateipfad.
-     * @param {{loop?: boolean, volume?: number}} options Audio-Optionen.
-     * @returns {HTMLAudioElement} Registriertes Audioelement.
-     */
+
+    /** Binds global APIs used in the game. */
+    bindToWindow() {
+        window.audioHub = this;
+        window.gameSound = this;
+        window.sound = this.createSoundFacade();
+        window.addEventListener('load', () => this.initializeAudioHubOnLoad());
+    }
+
+    /** Creates the effect methods from one mapping table. */
+    bindEffectMethods() {
+        let methodNames = Object.keys(this.effectMethods);
+        for (let index = 0; index < methodNames.length; index++) {
+            let methodName = methodNames[index];
+            let soundData = this.effectMethods[methodName];
+            this[methodName] = () => this.playEffectWithCooldown(soundData[0], soundData[1]);
+        }
+    }
+
+    /** Registers one sound once and returns audio element. */
     registerSound(name, url, options = {}) {
         if (this.sounds.has(name)) return this.sounds.get(name).audio;
         let audio = new Audio(url);
@@ -28,66 +81,109 @@ class AudioHub {
         this.sounds.set(name, { audio, baseVolume, loop: audio.loop });
         return audio;
     }
-    /**
-     * Prueft, ob ein Sound existiert.
-     * @param {string} name Interner Soundname.
-     * @returns {boolean} True wenn vorhanden.
-     */
+
+    /** Returns whether one sound key exists. */
     hasSound(name) {
         return this.sounds.has(name);
     }
-    /**
-     * Prueft, ob ein Sound gerade laeuft.
-     * @param {string} name Interner Soundname.
-     * @returns {boolean} True wenn Audio aktiv ist.
-     */
+
+    /** Returns whether one sound is active. */
     isPlaying(name) {
         if (!this.sounds.has(name)) return false;
         let item = this.sounds.get(name);
         return !item.audio.paused && !item.audio.ended;
     }
-    /**
-     * Spielt einen registrierten Sound.
-     * @param {string} name Interner Soundname.
-     */
+
+    /** Plays one sound and handles startscreen autoplay fallback. */
     play(name) {
         let item = this.sounds.get(name);
         if (!item) return;
         item.audio.volume = this.muted ? 0 : this.masterVolume * item.baseVolume;
         let playPromise = item.audio.play();
-        if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => { });
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => {
+                if (name === 'startscreenMusic') this.tryStartscreenMutedAutoplay(item);
+            });
+        }
     }
-    /**
-     * Pausiert einen Sound.
-     * @param {string} name Interner Soundname.
-     */
+
+    /** Tries muted autoplay bootstrap for startscreen music. */
+    tryStartscreenMutedAutoplay(soundItem) {
+        if (!this.canRunStartscreenAutoplayBoot(soundItem)) return;
+        this.startscreenAutoplayBootInProgress = true;
+        this.executeStartscreenAutoplayBoot(soundItem);
+    }
+
+    /** Checks if autoplay bootstrap may run. */
+    canRunStartscreenAutoplayBoot(soundItem) {
+        return !!soundItem && !this.startscreenAutoplayBootDone && !this.startscreenAutoplayBootInProgress;
+    }
+
+    /** Executes muted startscreen autoplay bootstrap. */
+    async executeStartscreenAutoplayBoot(soundItem) {
+        let audio = soundItem.audio;
+        let targetVolume = this.resolveTargetVolume(soundItem);
+        let didStart = false;
+        this.prepareMutedAutoplayAttempt(audio);
+        try {
+            didStart = await this.runMutedAutoplayAttempt(audio);
+        } catch (error) {
+            didStart = false;
+        }
+        this.finalizeMutedAutoplayAttempt(audio, targetVolume, didStart);
+    }
+
+    /** Resolves target volume for one sound item. */
+    resolveTargetVolume(soundItem) {
+        return this.muted ? 0 : this.masterVolume * soundItem.baseVolume;
+    }
+
+    /** Prepares a muted autoplay attempt. */
+    prepareMutedAutoplayAttempt(audio) {
+        audio.muted = true;
+        audio.volume = 0;
+    }
+
+    /** Runs one muted autoplay attempt. */
+    async runMutedAutoplayAttempt(audio) {
+        let mutedPlayPromise = audio.play();
+        if (!mutedPlayPromise || typeof mutedPlayPromise.then !== 'function') return true;
+        await mutedPlayPromise;
+        return true;
+    }
+
+    /** Finalizes autoplay bootstrap and restores volume. */
+    finalizeMutedAutoplayAttempt(audio, targetVolume, didStart) {
+        audio.muted = false;
+        audio.volume = targetVolume;
+        this.startscreenAutoplayBootDone = didStart;
+        this.startscreenAutoplayBootInProgress = false;
+    }
+
+    /** Pauses one sound. */
     pause(name) {
         let item = this.sounds.get(name);
         if (!item) return;
         item.audio.pause();
     }
-    /**
-     * Stoppt einen Sound und setzt ihn zurueck.
-     * @param {string} name Interner Soundname.
-     */
+
+    /** Stops and rewinds one sound. */
     stop(name) {
         let item = this.sounds.get(name);
         if (!item) return;
         item.audio.pause();
         item.audio.currentTime = 0;
     }
-    /**
-     * Spielt alle als Loop registrierten Sounds.
-     */
+
+    /** Plays all looping sounds. */
     playAllLooping() {
         for (let [name, soundItem] of this.sounds) {
             if (soundItem.loop) this.play(name);
         }
         this.playingMaster = true;
     }
-    /**
-     * Stoppt alle registrierten Sounds.
-     */
+
+    /** Stops all registered sounds. */
     stopAll() {
         for (let [, soundItem] of this.sounds) {
             soundItem.audio.pause();
@@ -95,10 +191,8 @@ class AudioHub {
         }
         this.playingMaster = false;
     }
-    /**
-     * Setzt die globale Lautstaerke.
-     * @param {number} value Zielwert zwischen 0 und 1.
-     */
+
+    /** Sets master volume for all sounds. */
     setMasterVolume(value) {
         let volume = Math.max(0, Math.min(1, Number(value)));
         this.masterVolume = volume;
@@ -106,288 +200,227 @@ class AudioHub {
             soundItem.audio.volume = this.muted ? 0 : this.masterVolume * soundItem.baseVolume;
         }
     }
-    /**
-     * Schaltet alle Sounds stumm.
-     */
+
+    /** Mutes all sounds. */
     mute() {
         this.muted = true;
         for (let [, soundItem] of this.sounds) {
             soundItem.audio.volume = 0;
         }
     }
-    /**
-     * Hebt die Stummschaltung auf.
-     */
+
+    /** Unmutes all sounds. */
     unmute() {
         this.muted = false;
         for (let [, soundItem] of this.sounds) {
             soundItem.audio.volume = this.masterVolume * soundItem.baseVolume;
         }
     }
-    /**
-     * Schaltet zwischen Mute und Unmute um.
-     * @returns {boolean} Aktueller Mute-Status.
-     */
+
+    /** Toggles mute state. */
     toggleMute() {
         if (this.muted) this.unmute();
         else this.mute();
         return this.muted;
     }
-    /**
-     * Liefert den Mute-Status.
-     * @returns {boolean} True wenn gemutet.
-     */
+
+    /** Returns mute state. */
     isMuted() {
         return this.muted;
     }
-}
-window.audioHub = new AudioHub();
-let gameSoundsRegistered = false;
-let audioCacheBustToken = Date.now();
-let gameSoundDefinitions = [
-    { name: 'startscreenMusic', file: 'audio_startscreen_sound.mp3', loop: true, volume: 0.38 },
-    { name: 'ingameMusic', file: 'audio_ingame_sound.mp3', loop: true, volume: 0.35 },
-    { name: 'characterJump', file: 'audio_character_jump.mp3', volume: 0.55 },
-    { name: 'characterRunning', file: 'audio_character_running.mp3', loop: true, volume: 0.28 },
-    { name: 'characterSnore', file: 'audio_character_snore.wav', loop: true, volume: 0.22 },
-    { name: 'characterHurt', file: 'audio_character_hurt.m4a', volume: 0.58 },
-    { name: 'characterThrow', file: 'audio_character_throw.m4a', volume: 0.55 },
-    { name: 'collectCoin', file: 'audio_collect_coin.m4a', volume: 0.56 },
-    { name: 'collectBottle', file: 'audio_collect_bottle.mp3', volume: 0.56 },
-    { name: 'bottleBreak', file: 'audio_bottle_breake.mp3', volume: 0.62 },
-    { name: 'chickenHurt', file: 'audio_chicken_hurt.mp3', volume: 0.58 },
-    { name: 'chickenWalking', file: 'audio_chicken_walking.mp3', loop: true, volume: 0.18 },
-    { name: 'smallChickenWalking', file: 'audio_small_chicken_walking.mp3', loop: true, volume: 0.17 },
-    { name: 'endbossIdle', file: 'audio_endboss_idle.wav', loop: true, volume: 0.2 },
-    { name: 'endbossHurt', file: 'audio_endboss_hurt.mp3', volume: 0.62 },
-    { name: 'endbossDead', file: 'audio_endboss_dead.wav', volume: 0.72 },
-    { name: 'gameOver', file: 'audio_game_over.mp3', volume: 0.72 },
-    { name: 'win', file: 'audio_win.m4a', volume: 0.74 }
-];
-/**
- * Registriert alle Sounds aus der Mapping-Liste.
- */
-function registerGameSounds() {
-    for (let index = 0; index < gameSoundDefinitions.length; index++) {
-        let definition = gameSoundDefinitions[index];
-        let cacheBust = definition.name === 'bottleBreak' ? `?v=${audioCacheBustToken}` : '';
-        let soundPath = `./assets/audio/${definition.file}${cacheBust}`;
-        window.audioHub.registerSound(definition.name, soundPath, { loop: !!definition.loop, volume: definition.volume });
+
+    /** Registers all game sounds once. */
+    registerGameSounds() {
+        for (let index = 0; index < this.gameSoundDefinitions.length; index++) {
+            let definition = this.gameSoundDefinitions[index];
+            let cacheBust = definition.name === 'bottleBreak' ? `?v=${this.audioCacheBustToken}` : '';
+            let soundPath = `./assets/audio/${definition.file}${cacheBust}`;
+            this.registerSound(definition.name, soundPath, { loop: !!definition.loop, volume: definition.volume });
+        }
     }
-}
-/**
- * Initialisiert die Sound-Registrierung genau einmal.
- */
-function ensureGameSoundsRegistered() {
-    if (gameSoundsRegistered) return;
-    registerGameSounds();
-    gameSoundsRegistered = true;
-}
-/**
- * Startet oder stoppt einen Loop-Sound.
- * @param {AudioHub} hub Audio-Instanz.
- * @param {string} name Interner Soundname.
- * @param {boolean} shouldPlay True startet, false stoppt.
- */
-function setLoopState(hub, name, shouldPlay) {
-    if (!hub.hasSound(name)) return;
-    if (shouldPlay) {
-        if (!hub.isPlaying(name)) hub.play(name);
-        return;
+
+    /** Ensures game sounds are registered exactly once. */
+    ensureGameSoundsRegistered() {
+        if (this.gameSoundsRegistered) return;
+        this.registerGameSounds();
+        this.gameSoundsRegistered = true;
     }
-    if (hub.isPlaying(name)) hub.stop(name);
-}
-/**
- * Stoppt alle Gameplay-Loop-Sounds.
- * @param {AudioHub} hub Audio-Instanz.
- */
-function stopGameplayLoops(hub) {
-    hub.stop('characterRunning');
-    hub.stop('characterSnore');
-    hub.stop('chickenWalking');
-    hub.stop('smallChickenWalking');
-    hub.stop('endbossIdle');
-}
-/**
- * Spielt einen Effekt mit Cooldown und Sofort-Neustart bei Re-Trigger.
- * @param {AudioHub} hub Audio-Instanz.
- * @param {Object} timestamps Zeitstempel-Map.
- * @param {string} name Effektname.
- * @param {number} cooldownMs Mindestabstand in Millisekunden.
- */
-function restartEffectNow(hub, name) {
-    hub.stop(name);
-    hub.play(name);
-}
 
-/**
- * Spielt einen Effekt mit Offset und erzwingt bei Re-Trigger direkten Neustart.
- * @param {AudioHub} hub Audio-Instanz.
- * @param {Object} timestamps Zeitstempel-Map.
- * @param {string} name Effektname.
- * @param {number} cooldownMs Mindestabstand in Millisekunden.
- */
-function playEffectWithCooldown(hub, timestamps, name, cooldownMs) {
-    ensureGameSoundsRegistered();
-    let now = Date.now();
-    let lastTime = timestamps[name] || 0;
-    let isInOffset = now - lastTime < cooldownMs;
-    if (isInOffset || hub.isPlaying(name)) {
-        timestamps[name] = now;
-        restartEffectNow(hub, name);
-        return;
+    /** Compatibility helper for existing gameSound usage. */
+    ensureSetup() {
+        this.ensureGameSoundsRegistered();
     }
-    timestamps[name] = now;
-    hub.play(name);
-}
-/** Aktiviert die Startscreen-Musik. */
-function playStartscreenMusic(hub) {
-    ensureGameSoundsRegistered();
-    stopGameplayLoops(hub);
-    hub.stop('ingameMusic');
-    hub.stop('win');
-    hub.stop('gameOver');
-    hub.play('startscreenMusic');
-}
 
-/** Aktiviert den Ingame-Musikmodus. */
-function playIngameMusic(hub) {
-    ensureGameSoundsRegistered();
-    hub.stop('startscreenMusic');
-    hub.stop('win');
-    hub.stop('gameOver');
-    hub.play('ingameMusic');
-}
-
-/** Spielt einen Endzustands-Sound. */
-function playEndStateSound(hub, soundName) {
-    ensureGameSoundsRegistered();
-    stopGameplayLoops(hub);
-    hub.stop('startscreenMusic');
-    hub.stop('ingameMusic');
-    hub.stop('win');
-    hub.stop('gameOver');
-    hub.play(soundName);
-}
-
-/** Synchronisiert Character-Loop-Sounds. */
-function syncCharacterLoops(hub, isRunning, isSnoring) {
-    ensureGameSoundsRegistered();
-    if (isRunning) {
-        setLoopState(hub, 'characterRunning', true);
-        setLoopState(hub, 'characterSnore', false);
-        return;
+    /** Starts or stops one loop sound. */
+    setLoopState(name, shouldPlay) {
+        if (!this.hasSound(name)) return;
+        if (shouldPlay) {
+            if (!this.isPlaying(name)) this.play(name);
+            return;
+        }
+        if (this.isPlaying(name)) this.stop(name);
     }
-    if (isSnoring) {
-        setLoopState(hub, 'characterRunning', false);
-        setLoopState(hub, 'characterSnore', true);
-        return;
+
+    /** Stops all gameplay loops. */
+    stopGameplayLoops() {
+        this.stop('characterRunning');
+        this.stop('characterSnore');
+        this.stop('chickenWalking');
+        this.stop('smallChickenWalking');
+        this.stop('endbossIdle');
     }
-    setLoopState(hub, 'characterRunning', false); setLoopState(hub, 'characterSnore', false);
-}
 
-/** Synchronisiert gegnerische Lauf-Ambience. */
-function syncEnemyLoops(hub, hasChicken, hasSmallChicken) {
-    ensureGameSoundsRegistered();
-    setLoopState(hub, 'chickenWalking', hasChicken);
-    setLoopState(hub, 'smallChickenWalking', hasSmallChicken);
-}
+    /** Restarts one effect immediately. */
+    restartEffectNow(name) {
+        this.stop(name);
+        this.play(name);
+    }
 
-/** Synchronisiert den Endboss-Idle-Loop. */
-function syncEndbossLoop(hub, isActive) {
-    ensureGameSoundsRegistered();
-    setLoopState(hub, 'endbossIdle', isActive);
-}
+    /** Plays one effect with cooldown-aware retriggering. */
+    playEffectWithCooldown(name, cooldownMs) {
+        this.ensureGameSoundsRegistered();
+        let now = Date.now();
+        let lastTime = this.effectTimestamps[name] || 0;
+        let isInOffset = now - lastTime < cooldownMs;
+        if (isInOffset || this.isPlaying(name)) {
+            this.effectTimestamps[name] = now;
+            this.restartEffectNow(name);
+            return;
+        }
+        this.effectTimestamps[name] = now;
+        this.play(name);
+    }
 
-/** Baut den Kern der Gameplay-Sound-API. */
-function createCoreBridgeApi(hub) {
-    return {
-        ensureSetup: ensureGameSoundsRegistered,
-        stopGameplayLoops() { stopGameplayLoops(hub); },
-        toStartscreen() { playStartscreenMusic(hub); },
-        toIngame() { playIngameMusic(hub); },
-        onWin() { playEndStateSound(hub, 'win'); },
-        onLose() { playEndStateSound(hub, 'gameOver'); },
-        syncCharacterMovement(isRunning, isSnoring) { syncCharacterLoops(hub, isRunning, isSnoring); },
-        syncEnemyAmbience(hasChicken, hasSmallChicken) { syncEnemyLoops(hub, hasChicken, hasSmallChicken); },
-        syncEndbossIdle(isActive) { syncEndbossLoop(hub, isActive); }
-    };
-}
+    /** Activates startscreen music mode. */
+    toStartscreen() {
+        this.ensureGameSoundsRegistered();
+        this.stopGameplayLoops();
+        this.stop('ingameMusic');
+        this.stop('win');
+        this.stop('gameOver');
+        this.play('startscreenMusic');
+    }
 
-/** Ergaenzt die haeufigen Effekt-Methoden. */
-function addPrimaryEffectApi(bridge, hub, effectTimestamps) {
-    bridge.playCharacterJump = () => playEffectWithCooldown(hub, effectTimestamps, 'characterJump', 120);
-    bridge.playCharacterHurt = () => playEffectWithCooldown(hub, effectTimestamps, 'characterHurt', 350);
-    bridge.playCharacterThrow = () => playEffectWithCooldown(hub, effectTimestamps, 'characterThrow', 140);
-    bridge.playCollectCoin = () => playEffectWithCooldown(hub, effectTimestamps, 'collectCoin', 90);
-    bridge.playCollectBottle = () => playEffectWithCooldown(hub, effectTimestamps, 'collectBottle', 110);
-}
+    /** Activates in-game music mode. */
+    toIngame() {
+        this.ensureGameSoundsRegistered();
+        this.stop('startscreenMusic');
+        this.stop('win');
+        this.stop('gameOver');
+        this.play('ingameMusic');
+    }
 
-/** Ergaenzt weitere Effekt-Methoden. */
-function addSecondaryEffectApi(bridge, hub, effectTimestamps) {
-    bridge.playBottleBreak = () => playEffectWithCooldown(hub, effectTimestamps, 'bottleBreak', 120);
-    bridge.playChickenHurt = () => playEffectWithCooldown(hub, effectTimestamps, 'chickenHurt', 140);
-    bridge.playEndbossHurt = () => playEffectWithCooldown(hub, effectTimestamps, 'endbossHurt', 260);
-    bridge.playEndbossDead = () => playEffectWithCooldown(hub, effectTimestamps, 'endbossDead', 1200);
-}
+    /** Plays win end-state audio. */
+    onWin() { this.playEndState('win'); }
 
-/** Baut die finale Bridge fuer gameplay-bezogene Sounds. */
-function createGameSoundBridge(hub) {
-    let effectTimestamps = {};
-    let bridge = createCoreBridgeApi(hub);
-    addPrimaryEffectApi(bridge, hub, effectTimestamps);
-    addSecondaryEffectApi(bridge, hub, effectTimestamps);
-    return bridge;
-}
-/**
- * Aktualisiert das Sound-Icon im Button.
- * @param {boolean} muted True bei Mute.
- */
-function updateSoundButtonIcon(muted) {
-    let button = document.getElementById('sound');
-    if (!button) return;
-    button.setAttribute('aria-pressed', muted ? 'true' : 'false');
-    if (muted) {
+    /** Plays lose end-state audio. */
+    onLose() { this.playEndState('gameOver'); }
+
+    /** Plays one end-state sound and stops competing loops. */
+    playEndState(soundName) {
+        this.ensureGameSoundsRegistered();
+        this.stopGameplayLoops();
+        this.stop('startscreenMusic');
+        this.stop('ingameMusic');
+        this.stop('win');
+        this.stop('gameOver');
+        this.play(soundName);
+    }
+
+    /** Syncs character movement loops. */
+    syncCharacterMovement(isRunning, isSnoring) {
+        this.ensureGameSoundsRegistered();
+        if (isRunning) return this.setRunningLoopState();
+        if (isSnoring) return this.setSnoringLoopState();
+        this.setLoopState('characterRunning', false);
+        this.setLoopState('characterSnore', false);
+    }
+
+    /** Activates running loop and stops snore loop. */
+    setRunningLoopState() {
+        this.setLoopState('characterRunning', true);
+        this.setLoopState('characterSnore', false);
+    }
+
+    /** Activates snore loop and stops running loop. */
+    setSnoringLoopState() {
+        this.setLoopState('characterRunning', false);
+        this.setLoopState('characterSnore', true);
+    }
+
+    /** Syncs enemy ambience loops. */
+    syncEnemyAmbience(hasChicken, hasSmallChicken) {
+        this.ensureGameSoundsRegistered();
+        this.setLoopState('chickenWalking', hasChicken);
+        this.setLoopState('smallChickenWalking', hasSmallChicken);
+    }
+
+    /** Syncs endboss idle loop. */
+    syncEndbossIdle(isActive) {
+        this.ensureGameSoundsRegistered();
+        this.setLoopState('endbossIdle', isActive);
+    }
+
+    /** Updates the sound button icon. */
+    updateSoundButtonIcon(muted) {
+        let button = document.getElementById('sound');
+        if (!button) return;
+        button.setAttribute('aria-pressed', muted ? 'true' : 'false');
+        if (muted) return this.showMutedIcon(button);
+        this.showUnmutedIcon(button);
+    }
+
+    /** Renders muted icon into sound button. */
+    showMutedIcon(button) {
         button.innerHTML = '<img src="assets/icon/volume_off.svg" alt="Muted">';
-        return;
     }
-    button.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">';
-}
-/**
- * Synchronisiert den Slider mit der Master-Lautstaerke.
- * @param {AudioHub} hub Audio-Instanz.
- */
-function syncSliderValue(hub) {
-    let slider = document.getElementById('audio-slider');
-    if (!slider) return;
-    slider.value = hub.masterVolume;
-}
-/** Baut die bestehende Sound-API fuer game.js. */
-function createSoundFacade(hub) {
-    return {
-        hub,
-        initUI() { ensureGameSoundsRegistered(); syncSliderValue(hub); updateSoundButtonIcon(hub.isMuted()); },
-        updateButtonUI(muted) { updateSoundButtonIcon(!!muted); },
-        toggleMute() { let muted = hub.toggleMute(); updateSoundButtonIcon(muted); return muted; },
-        setMasterVolume(value) { ensureGameSoundsRegistered(); hub.setMasterVolume(value); updateSoundButtonIcon(Number(value) <= 0 || hub.isMuted()); },
-        positionDialog() { }
-    };
-}
-/**
- * Fuehrt die Audio-Initialisierung nach dem Laden aus.
- */
-function initializeAudioHubOnLoad() {
-    ensureGameSoundsRegistered();
-    if (window.sound && typeof window.sound.initUI === 'function') {
-        window.sound.initUI();
+
+    /** Renders unmuted icon into sound button. */
+    showUnmutedIcon(button) {
+        button.innerHTML = '<img src="assets/icon/volume_up.svg" alt="Unmuted">';
+    }
+
+    /** Synchronizes slider value with current master volume. */
+    syncSliderValue() {
+        let slider = document.getElementById('audio-slider');
+        if (!slider) return;
+        slider.value = this.masterVolume;
+    }
+
+    /** Creates the sound facade consumed by ui-controls.class.js. */
+    createSoundFacade() {
+        let hub = this;
+        return {
+            hub,
+            initUI() {
+                hub.ensureGameSoundsRegistered();
+                hub.syncSliderValue();
+                hub.updateSoundButtonIcon(hub.isMuted());
+            },
+            updateButtonUI(muted) {
+                hub.updateSoundButtonIcon(!!muted);
+            },
+            toggleMute() {
+                let muted = hub.toggleMute();
+                hub.updateSoundButtonIcon(muted);
+                return muted;
+            },
+            setMasterVolume(value) {
+                hub.ensureGameSoundsRegistered();
+                hub.setMasterVolume(value);
+                hub.updateSoundButtonIcon(Number(value) <= 0 || hub.isMuted());
+            },
+            positionDialog() { }
+        };
+    }
+
+    /** Initializes audio facade once window load completes. */
+    initializeAudioHubOnLoad() {
+        this.ensureGameSoundsRegistered();
+        if (window.sound && typeof window.sound.initUI === 'function') {
+            window.sound.initUI();
+        }
     }
 }
-window.gameSound = createGameSoundBridge(window.audioHub);
-window.sound = createSoundFacade(window.audioHub);
-let previousWindowOnLoad = window.onload;
-window.onload = function () {
-    if (typeof previousWindowOnLoad === 'function') {
-        previousWindowOnLoad();
-    }
-    initializeAudioHubOnLoad();
-};
+
+new AudioHub().bindToWindow();

@@ -10,6 +10,7 @@ function init() {
     canvas = document.getElementById('canvas');
     setupEndscreenButtons();
     setupMobileControls();
+    activateStartscreenSound();
 }
 
 /**
