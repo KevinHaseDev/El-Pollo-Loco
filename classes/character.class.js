@@ -287,20 +287,20 @@ class Character extends MovableObject {
     }
 
     /**
-     * Prueft, ob eine Flasche geworfen werden darf.
-     * @param {boolean} isSpacePressed Aktueller Space-Status.
-     * @param {boolean} canThrow Globaler Wurf-Cooldown-Status.
-     * @returns {boolean} True, wenn geworfen werden darf.
+     * Returns whether a bottle can be thrown.
+     * @param {boolean} isSpacePressed Current space key state.
+     * @param {boolean} canThrow Global throw cooldown state.
+     * @returns {boolean} True when throwing is allowed.
      */
     canThrowBottle(isSpacePressed, canThrow) {
         return this.bottleAmount > 0 && isSpacePressed && canThrow;
     }
 
     /**
-     * Berechnet den naechsten Wurfstatus aus Input und Cooldown.
-     * @param {boolean} isSpacePressed Aktueller Space-Status.
-     * @param {boolean} canThrow Aktueller Cooldown-Status.
-     * @returns {{shouldThrow: boolean, canThrow: boolean}} Neuer Wurfstatus.
+     * Resolves the next throw state from input and cooldown.
+     * @param {boolean} isSpacePressed Current space key state.
+     * @param {boolean} canThrow Current cooldown state.
+     * @returns {{shouldThrow: boolean, canThrow: boolean}} Next throw state.
      */
     resolveThrowState(isSpacePressed, canThrow) {
         if (this.canThrowBottle(isSpacePressed, canThrow)) {
@@ -322,15 +322,15 @@ class Character extends MovableObject {
     }
 
     /**
-     * Erstellt ein neues Wurfobjekt an der Character-Position.
-     * @returns {ThrowableObject} Das erzeugte Wurfobjekt.
+     * Creates one new throwable object at character position.
+     * @returns {ThrowableObject} The created throwable object.
      */
     createThrowableBottle() {
         return new ThrowableObject(this.x + 100, this.y + 100);
     }
 
     /**
-     * Startet die kurze aktive Wurf-Animation.
+     * Starts the short active throw animation.
      */
     startThrowAnimation() {
         this.isThrowing = true;
@@ -341,7 +341,7 @@ class Character extends MovableObject {
         }, this.throwAnimationDuration || 400);
     }
 
-    /** Prueft Stomp-Bedingung von oben auf einen Gegner. */
+    /** Checks stomp conditions when landing on top of an enemy. */
     isJumpingOnEnemy(enemy) {
         if (!enemy) return false;
         if (typeof enemy.realY !== 'number' || typeof enemy.realHeight !== 'number') return false;
@@ -352,11 +352,10 @@ class Character extends MovableObject {
         let isOnTopHalf = characterBottom <= enemyStompLimit || this.realY <= enemy.realY + enemy.realHeight * 0.6;
         return this.isAboveGround() && (isFalling || isRecentBounce) && isOnTopHalf;
     }
-
     /**
-     * Versucht einen Sprungtreffer auf einen Gegner auszufuehren.
-     * @param {MovableObject} enemy Gegnerinstanz.
-     * @returns {boolean} True, wenn ein Sprungtreffer passiert ist.
+     * Tries to execute a jump hit on one enemy.
+     * @param {MovableObject} enemy Enemy instance.
+     * @returns {boolean} True when a jump hit occurred.
      */
     tryJumpOnEnemy(enemy) {
         if (enemy.isDead()) {
@@ -371,11 +370,10 @@ class Character extends MovableObject {
         }
         return false;
     }
-
     /**
-     * Verarbeitet direkten Gegnerkontakt ohne Sprungtreffer.
-     * @param {MovableObject} enemy Gegnerinstanz.
-     * @returns {boolean} True, wenn Schaden am Character entstanden ist.
+     * Handles direct enemy contact without a jump hit.
+     * @param {MovableObject} enemy Enemy instance.
+     * @returns {boolean} True when character damage occurred.
      */
     handleEnemyContact(enemy) {
         if (enemy.isDead()) {
@@ -393,8 +391,8 @@ class Character extends MovableObject {
     }
 
     /**
-     * Prueft, ob der Character den Lose-Zustand ausloesen soll.
-     * @returns {boolean} True, wenn der Character besiegt ist.
+     * Returns whether the character should trigger lose state.
+     * @returns {boolean} True when the character is defeated.
      */
     shouldTriggerLoseState() {
         return this.isDead();

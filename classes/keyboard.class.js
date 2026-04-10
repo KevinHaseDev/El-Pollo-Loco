@@ -9,7 +9,7 @@ class Keyboard {
     space = false;
 
     /**
-     * Setzt alle Eingaben auf `false` zurueck.
+     * Resets all input flags to false.
      */
     reset() {
         this.left = false;

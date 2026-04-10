@@ -228,8 +228,8 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Steuert den Endboss-Idle-Sound zentral ueber die Sound-Bridge.
-     * @param {boolean} isActive True wenn Idle-Sound laufen soll.
+     * Controls endboss idle sound through the sound bridge.
+     * @param {boolean} isActive True when idle sound should play.
      */
     syncEndbossIdleSound(isActive) {
         if (!window.gameSound) return;
@@ -299,17 +299,17 @@ class Endboss extends MovableObject {
     }
 
     /**
-     * Prueft, ob der Endboss seine aktive Bewegung starten soll.
-     * @param {number} characterX Aktuelle X-Position des Characters.
-     * @returns {boolean} True, wenn der Endboss starten soll.
+     * Returns whether endboss active movement should start.
+     * @param {number} characterX Current character x position.
+     * @returns {boolean} True when endboss should start.
      */
     shouldStartMoving(characterX) {
         return characterX >= 3595 || this.isHurt();
     }
 
     /**
-     * Prueft, ob der Endboss den Win-Zustand ausloesen soll.
-     * @returns {boolean} True, wenn der Endboss besiegt ist.
+     * Returns whether endboss defeat should trigger win state.
+     * @returns {boolean} True when endboss is defeated.
      */
     shouldTriggerWinState() {
         return this.isDead();

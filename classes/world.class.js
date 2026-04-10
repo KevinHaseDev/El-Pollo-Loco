@@ -140,8 +140,8 @@ class World {
     }
 
     /**
-     * Spielt den passenden Endsound fuer Win oder Lose.
-     * @param {'win' | 'lose'} type Endzustand.
+     * Plays the matching end-state sound for win or lose.
+     * @param {'win' | 'lose'} type End state.
      */
     playEndSound(type) {
         if (!window.gameSound) return;
@@ -168,7 +168,7 @@ class World {
     }
 
     /**
-     * Synchronisiert Lauf-Ambience der Gegner in festen Abstaenden.
+     * Synchronizes enemy walking ambience in fixed intervals.
      */
     syncAmbientEnemyAudio() {
         if (!window.gameSound) return;

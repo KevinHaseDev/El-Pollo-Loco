@@ -41,7 +41,7 @@ class DrawableObject {
     }
 
     /**
-     * Zeichnet das Objekt inkl. optionaler Spiegelung.
+     * Draws object including optional horizontal mirroring.
      * @param {CanvasRenderingContext2D} ctx Canvas context.
      */
     drawWithDirection(ctx) {
@@ -56,7 +56,7 @@ class DrawableObject {
     }
 
     /**
-     * Spiegelt den Zeichenkontext horizontal fuer dieses Objekt.
+     * Mirrors the drawing context horizontally for this object.
      * @param {CanvasRenderingContext2D} ctx Canvas context.
      */
     flipImage(ctx) {
@@ -67,7 +67,7 @@ class DrawableObject {
     }
 
     /**
-     * Hebt die Spiegelung des Zeichenkontexts wieder auf.
+     * Restores the drawing context after mirroring.
      * @param {CanvasRenderingContext2D} ctx Canvas context.
      */
     flipImageBack(ctx) {

@@ -23,9 +23,9 @@ class Level {
     }
 
     /**
-     * Setzt die World-Referenz auf allen Objekten einer Liste.
-     * @param {Array<MovableObject>} objectArray Objektliste.
-     * @param {World} world Aktuelle Weltinstanz.
+     * Assigns the world reference to all objects in one list.
+     * @param {Array<MovableObject>} objectArray Object list.
+     * @param {World} world Active world instance.
      */
     assignWorldReference(objectArray, world) {
         if (!objectArray) {
@@ -37,9 +37,9 @@ class Level {
     }
 
     /**
-     * Synchronisiert die World-Referenzen aller aktiven Listen.
-     * @param {World} world Aktuelle Weltinstanz.
-     * @param {Array<ThrowableObject>} throwableObject Aktive Wurfobjekte.
+     * Synchronizes world references for all active entity lists.
+     * @param {World} world Active world instance.
+     * @param {Array<ThrowableObject>} throwableObject Active throwable objects.
      */
     syncWorldReferences(world, throwableObject) {
         this.assignWorldReference(this.enemies, world);
@@ -50,9 +50,9 @@ class Level {
     }
 
     /**
-     * Entfernt einen Gegner ab einem gegebenen Death-Timer-Schwellwert.
-     * @param {MovableObject} enemy Gegnerinstanz.
-     * @param {number} threshold Mindestwert des Deadtimers.
+     * Removes one enemy once its deadtimer reaches a threshold.
+     * @param {MovableObject} enemy Enemy instance.
+     * @param {number} threshold Minimum deadtimer value.
      */
     removeEnemyByDeadtimer(enemy, threshold) {
         if (!enemy) {
@@ -64,25 +64,25 @@ class Level {
     }
 
     /**
-     * Entfernt eine Münze per Index.
-     * @param {number} index Index in der Coin-Liste.
+     * Removes one coin by index.
+     * @param {number} index Index in the coin list.
      */
     removeCoin(index) {
         this.coins.splice(index, 1);
     }
 
     /**
-     * Entfernt eine Flasche per Index.
-     * @param {number} index Index in der Bottle-Liste.
+     * Removes one bottle by index.
+     * @param {number} index Index in the bottle list.
      */
     removeBottle(index) {
         this.bottles.splice(index, 1);
     }
 
     /**
-     * Sammelt kollidierende Münzen für den Character ein.
-     * @param {Character} character Aktiver Character.
-     * @param {Function} onCollected Callback pro eingesammelter Münze.
+     * Collects all coins colliding with the character.
+     * @param {Character} character Active character.
+     * @param {Function} onCollected Callback per collected coin.
      */
     collectCollidingCoins(character, onCollected) {
         this.coins.forEach((coin, index) => {
@@ -97,9 +97,9 @@ class Level {
     }
 
     /**
-     * Sammelt kollidierende Flaschen für den Character ein.
-     * @param {Character} character Aktiver Character.
-     * @param {Function} onCollected Callback pro eingesammelter Flasche.
+     * Collects all bottles colliding with the character.
+     * @param {Character} character Active character.
+     * @param {Function} onCollected Callback per collected bottle.
      */
     collectCollidingBottles(character, onCollected) {
         this.bottles.forEach((bottle, index) => {
@@ -114,9 +114,9 @@ class Level {
     }
 
     /**
-     * Iteriert über alle Kombinationen aus Wurfobjekten und Gegnern.
-     * @param {Array<ThrowableObject>} throwableObject Aktive Wurfobjekte.
-     * @param {Function} onPair Callback pro Paar (bottle, enemy).
+     * Iterates over every bottle and enemy pair.
+     * @param {Array<ThrowableObject>} throwableObject Active throwable objects.
+     * @param {Function} onPair Callback for each pair (bottle, enemy).
      */
     forEachBottleEnemyPair(throwableObject, onPair) {
         if (!throwableObject || !onPair) {
@@ -130,8 +130,8 @@ class Level {
     }
 
     /**
-     * Iteriert über alle Gegnerobjekte.
-     * @param {Function} onEnemy Callback pro Gegner.
+     * Iterates over all enemy objects.
+     * @param {Function} onEnemy Callback for each enemy.
      */
     forEachEnemy(onEnemy) {
         if (!onEnemy) {
@@ -143,11 +143,11 @@ class Level {
     }
 
     /**
-     * Verarbeitet Kollisionen zwischen Wurfobjekten und Gegnern.
-     * @param {Array<ThrowableObject>} throwableObject Aktive Wurfobjekte.
-     * @param {Endboss} boss Endboss-Instanz.
-     * @param {Function} onBossDefeated Callback bei Boss-Niederlage.
-     * @returns {Array<ThrowableObject>} Aktualisierte Wurfobjektliste.
+     * Handles collisions between throwable bottles and enemies.
+     * @param {Array<ThrowableObject>} throwableObject Active throwable objects.
+     * @param {Endboss} boss Endboss instance.
+     * @param {Function} onBossDefeated Callback when boss is defeated.
+     * @returns {Array<ThrowableObject>} Updated throwable object list.
      */
     handleBottleEnemyCollisions(throwableObject, boss, onBossDefeated) {
         if (!throwableObject) {
@@ -170,9 +170,9 @@ class Level {
     }
 
     /**
-     * Spielt Treffer-Sounds fuer Flaschenkollisionen.
-     * @param {MovableObject} enemy Getroffenes Ziel.
-     * @param {number} previousEnergy Energie vor dem Treffer.
+     * Plays hit sounds for bottle collisions.
+     * @param {MovableObject} enemy Hit target.
+     * @param {number} previousEnergy Energy before the hit.
      */
     playBottleHitSound(enemy, previousEnergy) {
         if (!window.gameSound) return;
@@ -186,10 +186,10 @@ class Level {
     }
 
     /**
-     * Verarbeitet Character-Kollisionen mit Gegnern inkl. Callbacks.
-     * @param {Character} character Aktiver Character.
-     * @param {Function} onCharacterDamaged Callback bei Character-Schaden.
-     * @param {Function} onCharacterDefeated Callback bei Character-Niederlage.
+     * Handles character collisions with enemies, including callbacks.
+     * @param {Character} character Active character.
+     * @param {Function} onCharacterDamaged Callback when character takes damage.
+     * @param {Function} onCharacterDefeated Callback when character is defeated.
      */
     handleCharacterEnemyCollisions(character, onCharacterDamaged, onCharacterDefeated) {
         this.forEachEnemy((enemy) => {
@@ -207,10 +207,10 @@ class Level {
     }
 
     /**
-     * Liefert die Zeichenreihenfolge fuer scrollbare Weltobjekte.
-     * @param {Array<ThrowableObject>} throwableObject Aktive Wurfobjekte.
-     * @param {Endboss} boss Endboss-Instanz.
-     * @returns {Array<Array<DrawableObject>>} Gruppen in Render-Reihenfolge.
+     * Returns draw order groups for scrollable world objects.
+     * @param {Array<ThrowableObject>} throwableObject Active throwable objects.
+     * @param {Endboss} boss Endboss instance.
+     * @returns {Array<Array<DrawableObject>>} Groups in render order.
      */
     getScrollableObjectGroups(throwableObject, boss) {
         let objectGroups = [

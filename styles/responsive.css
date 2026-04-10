@@ -1,0 +1,249 @@
+.mobile_controls {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 18px;
+    justify-content: space-between;
+    align-items: flex-end;
+    z-index: 500;
+    pointer-events: none;
+}
+
+@media (hover: none) and (pointer: coarse),
+(max-width: 768px) {
+    .mobile_controls.active {
+        display: flex;
+    }
+}
+
+.mobile_controls_left,
+.mobile_controls_right {
+    display: flex;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.mobile_btn {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(198, 102, 47, 0.85);
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    transition: transform 0.1s ease, background 0.1s ease;
+}
+
+.mobile_btn:active {
+    transform: scale(0.92);
+    background: rgba(198, 102, 47, 1);
+}
+
+.mobile_controls_right.shift-left {
+    transform: translateX(-36px);
+    transition: transform 0.15s ease;
+}
+
+@media (max-width: 600px) {
+    .mobile_controls_right.shift-left {
+        transform: translateX(-52px);
+    }
+}
+
+@media (max-width: 600px) {
+    .game_area {
+        width: 95vw;
+    }
+
+    h1 {
+        font-size: 36px;
+        margin-top: 8px;
+    }
+
+    .game_button {
+        font-size: 18px;
+        padding: 10px 20px;
+    }
+
+    .mobile_btn {
+        width: 55px;
+        height: 55px;
+        font-size: 20px;
+    }
+
+    .mobile_controls {
+        padding: 0 20px;
+        bottom: 15px;
+    }
+
+    .canvas_info_buttons {
+        width: calc(95vw - 16px);
+        bottom: 10px;
+    }
+
+    .canvas_info_button {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .info_overlay {
+        padding: 10px;
+    }
+
+    .info_overlay_card {
+        max-height: 86vh;
+    }
+}
+
+@media (max-width: 400px) {
+    h1 {
+        font-size: 28px;
+    }
+
+    .mobile_btn {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+    }
+
+    .mobile_controls {
+        padding: 0 15px;
+    }
+
+    .mobile_controls_left,
+    .mobile_controls_right {
+        gap: 8px;
+    }
+}
+
+.portrait_overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #c6662f 0%, #8b4513 100%);
+    z-index: 10000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
+
+.portrait_overlay.visible {
+    display: flex;
+}
+
+.game_area.hidden_by_orientation {
+    display: none;
+}
+
+.portrait_content {
+    max-width: 90%;
+}
+
+.rotate_icon {
+    font-size: 80px;
+    margin-bottom: 50px;
+    animation: rotate-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rotate-pulse {
+
+    0%,
+    100% {
+        transform: rotate(0deg) scale(1);
+    }
+
+    50% {
+        transform: rotate(90deg) scale(1.1);
+    }
+}
+
+.portrait_overlay h2 {
+    font-family: "Rye", Arial, Helvetica, sans-serif;
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+.portrait_overlay p {
+    font-family: "Rye", Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+body.mobile_landscape_fullscreen .game_area {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+}
+
+body.mobile_landscape_fullscreen #canvas {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
+}
+
+body.mobile_landscape_fullscreen .canvas_info_buttons {
+    width: calc(100vw - 24px);
+    max-width: 1280px;
+    bottom: 12px;
+}
+
+body.mobile_landscape_fullscreen .mobile_controls {
+    bottom: 10px;
+    padding: 0 12px;
+}
+
+body.mobile_landscape_fullscreen .mobile_btn {
+    width: 55px;
+    height: 55px;
+    font-size: 20px;
+}
+
+@media (orientation: landscape) and (max-height: 450px) {
+    .mobile_btn {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
+
+    .mobile_controls {
+        bottom: 5px;
+        padding: 0 10px;
+    }
+
+    .mobile_controls_left,
+    .mobile_controls_right {
+        gap: 8px;
+    }
+}
+
+.canvas_info_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.canvas_info_button img {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
