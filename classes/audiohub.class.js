@@ -6,7 +6,8 @@ class AudioHub {
     constructor() {
         this.sounds = new Map();
         this.masterVolume = 1;
-        this.muted = false;
+        this.storageKeys = { muted: 'el-pollo-loco.muted' };
+        this.muted = this.loadPersistedMuteState();
         this.playingMaster = false;
 
         this.startscreenAutoplayBootInProgress = false;
@@ -100,19 +101,39 @@ class AudioHub {
         if (!item) return;
         item.audio.volume = this.muted ? 0 : this.masterVolume * item.baseVolume;
         if (name === 'startscreenMusic' && !this.startscreenAutoplayBootDone) {
-            this.tryStartscreenMutedAutoplay(item);
+            this.playStartscreenWithAutoplayFallback(item);
             return;
         }
         this.playSoundWithFallback(name, item);
     }
 
+    /** Tries direct startscreen playback before muted autoplay fallback. */
+    async playStartscreenWithAutoplayFallback(soundItem) {
+        if (!soundItem) return;
+        let didStart = await this.tryPlayAudio(soundItem.audio);
+        if (didStart) {
+            this.startscreenAutoplayBootDone = true;
+            return;
+        }
+        this.tryStartscreenMutedAutoplay(soundItem);
+    }
+
     /** Plays one sound and retries startscreen with muted bootstrap on failure. */
-    playSoundWithFallback(name, soundItem) {
-        let playPromise = soundItem.audio.play();
-        if (!playPromise || typeof playPromise.catch !== 'function') return;
-        playPromise.catch(() => {
-            if (name === 'startscreenMusic') this.tryStartscreenMutedAutoplay(soundItem);
-        });
+    async playSoundWithFallback(name, soundItem) {
+        if (!soundItem) return;
+        let didStart = await this.tryPlayAudio(soundItem.audio);
+        if (!didStart && name === 'startscreenMusic') this.tryStartscreenMutedAutoplay(soundItem);
+    }
+
+    /** Tries one audio.play call and returns success state. */
+    async tryPlayAudio(audio) {
+        if (!audio) return false;
+        try {
+            await audio.play();
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     /** Tries muted autoplay bootstrap for startscreen music. */
@@ -209,12 +230,42 @@ class AudioHub {
         }
     }
 
+    /** Loads mute state from localStorage. */
+    loadPersistedMuteState() {
+        let persistedValue = this.readStorageValue(this.storageKeys.muted);
+        return persistedValue === 'true';
+    }
+
+    /** Persists current mute state in localStorage. */
+    persistMuteState() {
+        this.writeStorageValue(this.storageKeys.muted, String(this.muted));
+    }
+
+    /** Reads one localStorage value safely. */
+    readStorageValue(key) {
+        try {
+            return window.localStorage.getItem(key);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    /** Writes one localStorage value safely. */
+    writeStorageValue(key, value) {
+        try {
+            window.localStorage.setItem(key, value);
+        } catch (error) {
+            return;
+        }
+    }
+
     /** Mutes all sounds. */
     mute() {
         this.muted = true;
         for (let [, soundItem] of this.sounds) {
             soundItem.audio.volume = 0;
         }
+        this.persistMuteState();
     }
 
     /** Unmutes all sounds. */
@@ -223,6 +274,7 @@ class AudioHub {
         for (let [, soundItem] of this.sounds) {
             soundItem.audio.volume = this.masterVolume * soundItem.baseVolume;
         }
+        this.persistMuteState();
     }
 
     /** Toggles mute state. */
@@ -336,12 +388,14 @@ class AudioHub {
     }
 
     /** Syncs character movement loops. */
-    syncCharacterMovement(isRunning, isSnoring) {
+    syncCharacterMovement(isRunning, isSnoring, isJumping) {
         this.ensureGameSoundsRegistered();
         if (isRunning) return this.setRunningLoopState();
         if (isSnoring) return this.setSnoringLoopState();
+        if (isJumping) return this.setJumpingLoopState();
         this.setLoopState('characterRunning', false);
         this.setLoopState('characterSnore', false);
+        this.setLoopState('characterJumping', false);
     }
 
     /** Activates running loop and stops snore loop. */
@@ -354,6 +408,13 @@ class AudioHub {
     setSnoringLoopState() {
         this.setLoopState('characterRunning', false);
         this.setLoopState('characterSnore', true);
+    }
+
+    /** Activates jumping loop and stops running and snore loops. */
+    setJumpingLoopState() {
+        this.setLoopState('characterRunning', false);
+        this.setLoopState('characterSnore', false);
+        this.setLoopState('characterJumping', true);
     }
 
     /** Syncs enemy ambience loops. */

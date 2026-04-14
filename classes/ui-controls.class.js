@@ -118,13 +118,24 @@ class UiControls {
     initSoundUI() {
         if (!window.sound) return;
         if (typeof window.sound.initUI === 'function') window.sound.initUI();
-        if (window.sound && window.sound.hub && typeof window.sound.hub.unmute === 'function') window.sound.hub.unmute();
-        if (window.sound && typeof window.sound.updateButtonUI === 'function') window.sound.updateButtonUI(false);
         this.ensureSoundIcon();
         this.bindSoundButton();
         this.bindLabelDialog();
         this.bindSlider();
         this.bindDocumentCloseHandlers();
+        this.applyMuteState(this.resolveCurrentMuteState(), false);
+    }
+
+    /**
+     * Resolves current mute state from active audio hub.
+     * @returns {boolean} True when audio is muted.
+     */
+    resolveCurrentMuteState() {
+        if (window.sound && window.sound.hub && typeof window.sound.hub.isMuted === 'function') {
+            return window.sound.hub.isMuted();
+        }
+        if (window.audioHub && typeof window.audioHub.isMuted === 'function') return window.audioHub.isMuted();
+        return false;
     }
 
     /**

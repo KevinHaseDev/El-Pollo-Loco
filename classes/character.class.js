@@ -241,6 +241,10 @@ class Character extends MovableObject {
         }
     }
 
+    /**
+     * Synchronizes movement audio with character state.
+     * @param {number} idleDuration Idle duration in seconds.
+     */
     syncMovementAudio(idleDuration) {
         if (!window.gameSound) return;
         let isMoving = this.world && (this.world.keyboard.right || this.world.keyboard.left);
@@ -249,6 +253,10 @@ class Character extends MovableObject {
         window.gameSound.syncCharacterMovement(isRunning, isSnoring);
     }
 
+    /**
+     * Plays a game sound method if available.
+     * @param {string} methodName Name of the sound method to play.
+     */
     playGameSound(methodName) {
         if (!window.gameSound) return;
         if (typeof window.gameSound[methodName] === 'function') {
